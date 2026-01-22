@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import MyReports from './pages/MyReports';
+import ReportDetails from './pages/ReportDetails';
 import ReportLost from './pages/ReportLost';
 import FoundItems from './pages/FoundItems';
 import FoundItemDetails from './pages/FoundItemDetails';
@@ -24,7 +27,31 @@ function App() {
             } 
           />
           <Route 
-            path="/lost/report" 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/reports" 
+            element={
+              <ProtectedRoute>
+                <MyReports />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/reports/:id" 
+            element={
+              <ProtectedRoute>
+                <ReportDetails />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/report-lost" 
             element={
               <ProtectedRoute>
                 <ReportLost />

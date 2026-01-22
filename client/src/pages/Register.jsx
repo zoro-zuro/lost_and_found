@@ -1,30 +1,114 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import Input from '../components/Input';
 import API from '../services/api';
 
 const Register = () => {
+  const [activeTab, setActiveTab] = useState('STUDENT'); // STUDENT or STAFF
   const [formData, setFormData] = useState({
     name: '',
-    registerNumber: '',
     email: '',
     password: '',
-    role: 'user'
+    role: 'STUDENT',
+    // Student fields
+    registerNumber: '',
+    block: '',
+    department: '',
+    // Staff fields
+    staffId: '',
+    staffSecret: '',
+    // Common optional
+    phone: '',
+    altPhone: ''
   });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
-  const { name, registerNumber, email, password, role } = formData;
+  // AMC email validation
+  const validateEmail = (email) => {
+    const amcEmailRegex = /^[a-z0-9]+@americancollege\.edu\.in$/i;
+    if (!amcEmailRegex.test(email)) {
+      return 'Email must be a valid AMC college email (e.g., 23bit15@americancollege.edu.in)';
+    }
+    return '';
+  };
 
   const onChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    // Clear error for this field
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: '' });
+    }
+  };
+
+  const switchTab = (tab) => {
+    setActiveTab(tab);
+    setFormData({
+      ...formData,
+      role: tab,
+      // Clear role-specific fields when switching
+      registerNumber: '',
+      block: '',
+      department: tab === 'STUDENT' ? '' : formData.department,
+      staffId: '',
+      staffSecret: ''
+    });
+    setErrors({});
+    setSuccessMessage('');
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      newErrors.email = emailError;
+    }
+
+    if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (activeTab === 'STUDENT') {
+      if (!formData.registerNumber.trim()) {
+        newErrors.registerNumber = 'Register number is required';
+      }
+      if (!formData.block.trim()) {
+        newErrors.block = 'Block/Hall is required';
+      }
+      if (!formData.department.trim()) {
+        newErrors.department = 'Department is required';
+      }
+    } else {
+      // STAFF or ADMIN
+      if (!formData.staffId.trim()) {
+        newErrors.staffId = 'Staff ID is required';
+      }
+      if (!formData.staffSecret.trim()) {
+        newErrors.staffSecret = 'Staff registration code is required';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
-    setError('');
+    setSuccessMessage('');
 
     try {
       const res = await API.post('/api/auth/register', formData);
@@ -32,9 +116,16 @@ const Register = () => {
       localStorage.setItem('token', res.data.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.data.user));
       
-      navigate('/dashboard');
+      if (activeTab === 'STAFF' || activeTab === 'ADMIN') {
+        setSuccessMessage(res.data.message || 'Account created! Awaiting admin approval.');
+        setTimeout(() => navigate('/login'), 3000);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
+      setErrors({ 
+        submit: err.response?.data?.message || 'Registration failed. Please try again.' 
+      });
     } finally {
       setLoading(false);
     }
@@ -42,7 +133,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-2xl">
         <div className="glass-card p-8">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
@@ -51,79 +142,182 @@ const Register = () => {
               </svg>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-            <p className="text-gray-600">Join us today</p>
+            <p className="text-gray-600">Join American College Lost & Found</p>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200 mb-6">
+            <button
+              onClick={() => switchTab('STUDENT')}
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-all ${
+                activeTab === 'STUDENT'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Student
+            </button>
+            <button
+              onClick={() => switchTab('STAFF')}
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-all ${
+                activeTab === 'STAFF'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Staff / Admin
+            </button>
           </div>
 
           <form onSubmit={onSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="name"
+            {/* Common Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                label="Full Name"
                 name="name"
-                value={name}
+                value={formData.name}
                 onChange={onChange}
-                required
-                className="input-field"
                 placeholder="John Doe"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="registerNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                Register Number
-              </label>
-              <input
-                type="text"
-                id="registerNumber"
-                name="registerNumber"
-                value={registerNumber}
-                onChange={onChange}
                 required
-                className="input-field"
-                placeholder="REG2024001"
+                error={errors.name}
               />
-            </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
+              <Input
+                label="AMC Email"
                 name="email"
-                value={email}
+                type="email"
+                value={formData.email}
                 onChange={onChange}
+                placeholder="23bit15@americancollege.edu.in"
                 required
-                className="input-field"
-                placeholder="you@example.com"
+                error={errors.email}
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={password}
+            {/* Student-specific Fields */}
+            {activeTab === 'STUDENT' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Input
+                    label="Register Number"
+                    name="registerNumber"
+                    value={formData.registerNumber}
+                    onChange={onChange}
+                    placeholder="23BIT15"
+                    required
+                    error={errors.registerNumber}
+                  />
+
+                  <Input
+                    label="Block / Hall"
+                    name="block"
+                    value={formData.block}
+                    onChange={onChange}
+                    placeholder="e.g., Washburn Hall"
+                    required
+                    error={errors.block}
+                  />
+                </div>
+
+                <Input
+                  label="Department"
+                  name="department"
+                  value={formData.department}
+                  onChange={onChange}
+                  placeholder="e.g., Computer Science"
+                  required
+                  error={errors.department}
+                />
+              </>
+            )}
+
+            {/* Staff/Admin-specific Fields */}
+            {(activeTab === 'STAFF' || activeTab === 'ADMIN') && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Input
+                    label="Staff ID / Employee Number"
+                    name="staffId"
+                    value={formData.staffId}
+                    onChange={onChange}
+                    placeholder="EMP001"
+                    required
+                    error={errors.staffId}
+                  />
+
+                  <Input
+                    label="Department (Optional)"
+                    name="department"
+                    value={formData.department}
+                    onChange={onChange}
+                    placeholder="e.g., Administration"
+                    error={errors.department}
+                  />
+                </div>
+
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <p className="text-sm text-yellow-800 mb-2">
+                    <strong>Staff Registration:</strong> You need a staff registration code. Contact the administrator to obtain this code.
+                  </p>
+                  <Input
+                    label="Staff Registration Code"
+                    name="staffSecret"
+                    type="password"
+                    value={formData.staffSecret}
+                    onChange={onChange}
+                    placeholder="Enter code"
+                    required
+                    error={errors.staffSecret}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Password */}
+            <Input
+              label="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={onChange}
+              placeholder="••••••••"
+              required
+              minLength={6}
+              error={errors.password}
+            />
+
+            {/* Optional Contact Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                label="Phone (Optional)"
+                name="phone"
+                type="tel"
+                value={formData.phone}
                 onChange={onChange}
-                required
-                minLength="6"
-                className="input-field"
-                placeholder="••••••••"
+                placeholder="+91 98765 43210"
+              />
+
+              <Input
+                label="Alternate Phone (Optional)"
+                name="altPhone"
+                type="tel"
+                value={formData.altPhone}
+                onChange={onChange}
+                placeholder="+91 98765 43210"
               />
             </div>
 
-
-            {error && (
+            {/* Error Message */}
+            {errors.submit && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
+                {errors.submit}
+              </div>
+            )}
+
+            {/* Success Message */}
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                {successMessage}
               </div>
             )}
 

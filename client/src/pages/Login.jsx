@@ -1,27 +1,65 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import Input from '../components/Input';
 import API from '../services/api';
 
 const Login = () => {
+  const [activeTab, setActiveTab] = useState('STUDENT'); // STUDENT or STAFF
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const { email, password } = formData;
+  // AMC email validation
+  const validateEmail = (email) => {
+    const amcEmailRegex = /^[a-z0-9]+@americancollege\.edu\.in$/i;
+    if (!amcEmailRegex.test(email)) {
+      return 'Email must be a valid AMC college email (e.g., 23bit15@americancollege.edu.in)';
+    }
+    return '';
+  };
 
   const onChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    // Clear error for this field
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: '' });
+    }
+  };
+
+  const switchTab = (tab) => {
+    setActiveTab(tab);
+    setErrors({});
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      newErrors.email = emailError;
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
-    setError('');
 
     try {
       const res = await API.post('/api/auth/login', formData);
@@ -31,7 +69,9 @@ const Login = () => {
       
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      setErrors({ 
+        submit: err.response?.data?.message || 'Login failed. Please check your credentials.' 
+      });
     } finally {
       setLoading(false);
     }
@@ -51,42 +91,56 @@ const Login = () => {
             <p className="text-gray-600">Sign in to your account</p>
           </div>
 
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200 mb-6">
+            <button
+              onClick={() => switchTab('STUDENT')}
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-all ${
+                activeTab === 'STUDENT'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Student
+            </button>
+            <button
+              onClick={() => switchTab('STAFF')}
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-all ${
+                activeTab === 'STAFF'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Staff / Admin
+            </button>
+          </div>
+
           <form onSubmit={onSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={email}
-                onChange={onChange}
-                required
-                className="input-field"
-                placeholder="you@example.com"
-              />
-            </div>
+            <Input
+              label="AMC Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={onChange}
+              placeholder="23bit15@americancollege.edu.in"
+              required
+              error={errors.email}
+            />
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={password}
-                onChange={onChange}
-                required
-                className="input-field"
-                placeholder="••••••••"
-              />
-            </div>
+            <Input
+              label="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={onChange}
+              placeholder="••••••••"
+              required
+              error={errors.password}
+            />
 
-            {error && (
+            {errors.submit && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
+                {errors.submit}
               </div>
             )}
 

@@ -35,7 +35,13 @@ const Navbar = () => {
                 Dashboard
               </Link>
               <Link
-                to="/lost/report"
+                to="/reports"
+                className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                My Reports
+              </Link>
+              <Link
+                to="/report-lost"
                 className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Report Lost
@@ -45,6 +51,12 @@ const Navbar = () => {
                 className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Browse Found
+              </Link>
+              <Link
+                to="/profile"
+                className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Profile
               </Link>
             </div>
           </div>
@@ -77,7 +89,13 @@ const Navbar = () => {
             Dashboard
           </Link>
           <Link
-            to="/lost/report"
+            to="/reports"
+            className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
+          >
+            My Reports
+          </Link>
+          <Link
+            to="/report-lost"
             className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
           >
             Report Lost
@@ -87,6 +105,12 @@ const Navbar = () => {
             className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
           >
             Browse Found
+          </Link>
+          <Link
+            to="/profile"
+            className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
+          >
+            Profile
           </Link>
         </div>
       </div>

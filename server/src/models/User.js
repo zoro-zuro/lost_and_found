@@ -7,28 +7,83 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Name is required'],
     trim: true
   },
-  registerNumber: {
-    type: String,
-    required: [true, 'Register number is required'],
-    unique: true,
-    trim: true
-  },
   email: {
     type: String,
     required: [true, 'Email is required'],
     unique: true,
     trim: true,
-    lowercase: true
+    lowercase: true,
+    validate: {
+      validator: function(v) {
+        // AMC college email format: 23bit15@americancollege.edu.in
+        return /^[a-z0-9]+@americancollege\.edu\.in$/i.test(v);
+      },
+      message: 'Email must be a valid AMC college email (e.g., 23bit15@americancollege.edu.in)'
+    }
   },
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters']
+    minlength: [6, 'Password must be at least 6 characters'],
+    select: false
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
+    enum: ['STUDENT', 'STAFF', 'ADMIN'],
+    required: [true, 'Role is required'],
+    default: 'STUDENT'
+  },
+  
+  // Student-specific fields
+  registerNumber: {
+    type: String,
+    trim: true,
+    sparse: true,
+    unique: true,
+    required: function() {
+      return this.role === 'STUDENT';
+    }
+  },
+  block: {
+    type: String,
+    trim: true,
+    required: function() {
+      return this.role === 'STUDENT';
+    }
+  },
+  
+  // Staff/Admin-specific fields
+  staffId: {
+    type: String,
+    trim: true,
+    sparse: true,
+    unique: true,
+    required: function() {
+      return this.role === 'STAFF' || this.role === 'ADMIN';
+    }
+  },
+  isApproved: {
+    type: Boolean,
+    default: function() {
+      return this.role === 'STUDENT'; // Students auto-approved, staff/admin need approval
+    }
+  },
+  
+  // Common optional fields
+  department: {
+    type: String,
+    trim: true,
+    required: function() {
+      return this.role === 'STUDENT';
+    }
+  },
+  phone: {
+    type: String,
+    trim: true
+  },
+  altPhone: {
+    type: String,
+    trim: true
   }
 }, {
   timestamps: true

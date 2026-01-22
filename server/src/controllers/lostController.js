@@ -1,5 +1,6 @@
 const LostItem = require('../models/LostItem');
 const FoundItem = require('../models/FoundItem');
+const User = require('../models/User');
 
 // @desc    Create lost item
 // @route   POST /api/lost
@@ -15,7 +16,9 @@ const createLostItem = async (req, res, next) => {
       color,
       brand,
       uniqueMark,
-      contactPhone
+      contactPhone,
+      visibility,
+      notifyRequested
     } = req.body;
 
     // Validation
@@ -43,12 +46,18 @@ const createLostItem = async (req, res, next) => {
       color,
       brand,
       uniqueMark,
-      contactPhone
+      contactPhone,
+      visibility: visibility || 'CAMPUS',
+      notifyRequested: notifyRequested || false
     });
+
+    // Populate user details
+    await lostItem.populate('userId', 'name email role');
 
     res.status(201).json({
       success: true,
-      data: lostItem
+      data: lostItem,
+      message: 'Lost item reported successfully. Your report is now under review.'
     });
   } catch (error) {
     next(error);
@@ -60,9 +69,11 @@ const createLostItem = async (req, res, next) => {
 // @access  Private
 const getMyLostItems = async (req, res, next) => {
   try {
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 20;
     const page = parseInt(req.query.page) || 1;
 
+    const totalCount = await LostItem.countDocuments({ userId: req.user._id });
+    
     const lostItems = await LostItem.find({ userId: req.user._id })
       .sort({ createdAt: -1 })
       .limit(limit)
@@ -71,7 +82,104 @@ const getMyLostItems = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: lostItems
+      data: lostItems,
+      pagination: {
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+        totalCount
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get single lost item (owner only)
+// @route   GET /api/lost/:id
+// @access  Private
+const getLostItem = async (req, res, next) => {
+  try {
+    const lostItem = await LostItem.findById(req.params.id)
+      .populate('userId', 'name email role registerNumber staffId');
+    
+    if (!lostItem) {
+      return res.status(404).json({
+        success: false,
+        message: 'Lost item not found'
+      });
+    }
+
+    // Check if user owns this lost item or is admin
+    if (lostItem.userId._id.toString() !== req.user._id.toString() && req.user.role !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view this item'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: lostItem
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get nearby lost items (Help Others feature)
+// @route   GET /api/lost/nearby
+// @access  Private
+const getNearbyLostItems = async (req, res, next) => {
+  try {
+    const scope = req.query.scope || 'block'; // block | all
+    const category = req.query.category;
+    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page) || 1;
+
+    // Get current user's block
+    const currentUser = await User.findById(req.user._id);
+    
+    // Build query
+    const query = {
+      publishStatus: 'PUBLISHED',
+      visibility: 'CAMPUS',
+      reviewStatus: 'APPROVED',
+      status: 'OPEN',
+      userId: { $ne: req.user._id } // Don't show user's own items
+    };
+
+    // Filter by block if scope is 'block' and user has a block
+    if (scope === 'block' && currentUser.block) {
+      // We need to populate userId to check block, but we'll do it differently
+      // Instead, we'll get all user IDs with matching block first
+      const usersInBlock = await User.find({ block: currentUser.block }).select('_id');
+      const userIds = usersInBlock.map(u => u._id);
+      query.userId = { $in: userIds };
+    }
+
+    if (category) {
+      query.category = category;
+    }
+
+    const totalCount = await LostItem.countDocuments(query);
+
+    const lostItems = await LostItem.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip((page - 1) * limit)
+      .select('-contactPhone -uniqueMark') // Don't expose sensitive details
+      .populate('userId', 'name block department');
+
+    res.status(200).json({
+      success: true,
+      data: lostItems,
+      pagination: {
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+        totalCount
+      }
     });
   } catch (error) {
     next(error);
@@ -129,5 +237,7 @@ const getMatches = async (req, res, next) => {
 module.exports = {
   createLostItem,
   getMyLostItems,
+  getLostItem,
+  getNearbyLostItems,
   getMatches
 };

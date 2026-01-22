@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactSelect from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import Card from '../components/Card';
@@ -14,12 +15,15 @@ const ReportLost = () => {
     itemName: '',
     category: '',
     dateLost: '',
-    locationLost: '',
+    locationLost: [],
+    otherLocation: '',
     description: '',
     color: '',
     brand: '',
     uniqueMark: '',
-    contactPhone: ''
+    contactPhone: '',
+    visibility: 'CAMPUS',
+    notifyRequested: false
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -38,15 +42,54 @@ const ReportLost = () => {
     { value: 'Other', label: 'Other' }
   ];
 
-  const locations = [
-    { value: 'Library', label: 'Library' },
-    { value: 'Cafeteria', label: 'Cafeteria' },
-    { value: 'Classroom', label: 'Classroom' },
-    { value: 'Parking Lot', label: 'Parking Lot' },
-    { value: 'Gym', label: 'Gym' },
-    { value: 'Lobby', label: 'Lobby' },
-    { value: 'Other', label: 'Other (specify)' }
-  ];
+    const locations = [
+  // Academic Buildings - Main Campus (Officially verified)
+  { value: 'main-hall', label: 'Main Hall (Principal, VP, COE, Bursar, Dean Offices, Assembly Hall)' },
+  { value: 'james-hall', label: 'James Hall (Physics, Chemistry, Documentation Centre, PG Physics, DAS)' },
+  { value: 'jivana-jyoti-block', label: 'Jivana Jyoti Block (Computer Training for Physically Disabled)' },
+  { value: 'binghamton-hall', label: 'Binghamton Hall (Zoology, Botany, Biochemistry)' },
+  { value: 'flint-house', label: 'Flint House (English Department)' },
+  { value: 'oberlin-shansi-building', label: 'Oberlin Shansi Building (Deans, Women Students Cell, International Exchange, Alumni)' },
+  { value: 'new-building', label: 'New Building (Management, CS, Social Work, Commerce, SCILET, Seminar Hall)' },
+  { value: 'paul-linder-love-hall', label: 'Paul Linder Love Hall (MCA, MSc Data Science, CS/IT/BCA, COE)' },
+  { value: 'jones-hall', label: 'Jones Hall (Examination Hall)' },
+  { value: 'edward-nolting-hall', label: 'Edward Nolting Hall (Event Venue, Cultural Fests)' },
+  { value: 'stoffer-hall', label: 'Stoffer Hall' },
+  { value: 'daniel-poor-memorial-humanities-hall', label: 'Daniel Poor Memorial Humanities Hall' },
+  { value: 'centenary-block', label: 'Centenary Block' },
+  { value: 'mathematics-hall', label: 'Mathematics Hall' },
+  { value: 'tamil-department', label: 'Tamil Department' },
+  { value: 'auditorium', label: 'Auditorium' },
+  { value: 'saunders-hall', label: 'Saunders Hall (Psychology Department)' },
+  
+  // Hostels - Boys
+  { value: 'washburn-hall', label: 'Washburn Hall (Boys Hostel - Freshers)' },
+  { value: 'dudley-hall', label: 'Dudley Hall (Boys Hostel)' },
+  { value: 'wallace-hall', label: 'Wallace Hall (PG Hostel)' },
+  { value: 'zumbro-hall', label: 'Zumbro Hall (Boys Hostel)' },
+  
+  // Hostels - Girls
+  { value: 'ladies-hostel', label: 'Ladies Hostel (Girls Hostel)' },
+  { value: 'womens-hall', label: "Women's Hall (Girls Hostel)" },
+  { value: 'noyes-garden', label: 'Noyes Garden (Girls Hostel)' },
+  
+  // Facilities & Amenities
+  { value: 'college-canteen', label: 'College Canteen / RR Canteen' },
+  { value: 'library', label: 'Library (60,000 volumes)' },
+  { value: 'main-gate', label: 'Main Gate / Washburn Gate' },
+  { value: 'back-gate', label: 'Back Gate' },
+  { value: 'parking-lot', label: 'Parking Lot' },
+  { value: 'gym', label: 'Gym' },
+  { value: 'lobby', label: 'Lobby' },
+  { value: 'playground', label: 'Playground (Football, Cricket, Hockey, Athletics)' },
+  { value: 'tennis-court', label: 'Tennis Court' },
+  { value: 'basketball-court', label: 'Basketball Court (Flood-lit)' },
+  { value: 'volleyball-court', label: 'Volleyball Court' },
+  { value: 'medical-centre', label: 'Medical Centre' },
+  
+  // Other
+  { value: 'other', label: 'Other (specify)' }
+];
 
   const validateForm = () => {
     const newErrors = {};
@@ -63,8 +106,17 @@ const ReportLost = () => {
       newErrors.dateLost = 'Date lost is required';
     }
 
-    if (!formData.locationLost.trim()) {
+    if (formData.locationLost.length === 0) {
       newErrors.locationLost = 'Location lost is required';
+    }
+
+    if (formData.locationLost.includes('other')) {
+      if (formData.locationLost.length === 1) {
+         newErrors.locationLost = 'Please select at least one nearest location along with Other';
+      }
+      if (!formData.otherLocation.trim()) {
+        newErrors.otherLocation = 'Please specify the location';
+      }
     }
 
     if (!formData.description.trim()) {
@@ -78,10 +130,31 @@ const ReportLost = () => {
   };
 
   const onChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Check if it's the custom select event (which passes value directly or array of values)
+    if (Array.isArray(e) || (e && e.value && !e.target)) {
+       // This is likely from ReactSelect for locationLost
+       // But wait, ReactSelect passes (newValue, actionMeta).
+       // I'll handle ReactSelect onChange separately in the component prop to avoid confusion.
+       return; 
+    }
+
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
     // Clear error for this field
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const onLocationChange = (selectedOptions) => {
+    const values = selectedOptions ? selectedOptions.map(opt => opt.value) : [];
+    setFormData(prev => ({ ...prev, locationLost: values }));
+    
+    // Clear error
+    if (errors.locationLost && values.length > 0) {
+       // Also check the specific "Other" condition if needed to clear error immediately, 
+       // but for now just clearing the main required error is enough.
+       setErrors(prev => ({ ...prev, locationLost: '' }));
     }
   };
 
@@ -94,26 +167,36 @@ const ReportLost = () => {
 
     setLoading(true);
     try {
-      const res = await API.post('/api/lost', formData);
+
+      // Prepare data for submission
+      const submitPayload = { ...formData };
+      
+      // Format location string
+      const selectedLocs = submitPayload.locationLost
+        .filter(l => l !== 'other')
+        .map(l => {
+          const loc = locations.find(i => i.value === l);
+          return loc ? loc.label : l;
+        });
+      
+      if (submitPayload.locationLost.includes('other')) {
+        selectedLocs.push(`Other: ${submitPayload.otherLocation}`);
+      }
+      
+      submitPayload.locationLost = selectedLocs.join(', ');
+      delete submitPayload.otherLocation;
+
+      const res = await API.post('/api/lost', submitPayload);
       
       setToast({
-        message: 'Lost item reported successfully!',
+        message: res.data.message || 'Lost item reported successfully!',
         type: 'success'
       });
 
-      // Fetch potential matches
-      try {
-        const matchesRes = await API.get(`/api/lost/${res.data.data._id}/matches`);
-        setMatches(matchesRes.data.data);
-        setShowMatches(true);
-      } catch (err) {
-        console.error('Error fetching matches:', err);
-      }
-
-      // Redirect to dashboard after showing matches
+      // Redirect to My Reports after 2 seconds
       setTimeout(() => {
-        navigate('/dashboard');
-      }, 5000);
+        navigate('/reports');
+      }, 2000);
       
     } catch (err) {
       setToast({
@@ -169,16 +252,49 @@ const ReportLost = () => {
                 max={new Date().toISOString().split('T')[0]}
               />
 
-              <Select
-                label="Location Lost"
-                name="locationLost"
-                value={formData.locationLost}
-                onChange={onChange}
-                options={locations}
-                required
-                error={errors.locationLost}
-                placeholder="Select location"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Location Lost <span className="text-red-500">*</span>
+                </label>
+                <ReactSelect
+                  isMulti
+                  name="locationLost"
+                  options={locations}
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  value={locations.filter(option => formData.locationLost.includes(option.value))}
+                  onChange={onLocationChange}
+                  placeholder="Select locations..."
+                  styles={{
+                    control: (base, state) => ({
+                      ...base,
+                      borderColor: errors.locationLost ? '#ef4444' : base.borderColor,
+                      '&:hover': {
+                        borderColor: errors.locationLost ? '#ef4444' : base.borderColor
+                      },
+                      padding: '5px',
+                      borderRadius: '8px',
+                    })
+                  }}
+                />
+                {errors.locationLost && (
+                  <p className="mt-1 text-sm text-red-600">{errors.locationLost}</p>
+                )}
+                
+                {formData.locationLost.includes('other') && (
+                  <div className="mt-4">
+                    <Input 
+                      label="Specify Location"
+                      name="otherLocation"
+                      value={formData.otherLocation}
+                      onChange={onChange}
+                      placeholder="Please specify the nearest location"
+                      required
+                      error={errors.otherLocation}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <TextArea
@@ -226,6 +342,67 @@ const ReportLost = () => {
               placeholder="Any scratches, engravings, stickers, or other unique features..."
               rows={2}
             />
+
+            {/* Visibility and Notification Settings */}
+            <div className="space-y-4 border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-semibold text-gray-900">Report Settings</h3>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Who can see this report?
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="visibility"
+                      value="CAMPUS"
+                      checked={formData.visibility === 'CAMPUS'}
+                      onChange={onChange}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      <span className="font-medium">Campus Wide</span>
+                      <span className="block text-xs text-gray-500">Everyone on campus can see and help find</span>
+                    </span>
+                  </label>
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="visibility"
+                      value="ADMIN_ONLY"
+                      checked={formData.visibility === 'ADMIN_ONLY'}
+                      onChange={onChange}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      <span className="font-medium">Admin Only</span>
+                      <span className="block text-xs text-gray-500">Only administrators can view</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <label className="flex items-start cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="notifyRequested"
+                    checked={formData.notifyRequested}
+                    onChange={(e) => setFormData({ ...formData, notifyRequested: e.target.checked })}
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 mt-0.5"
+                  />
+                  <div className="ml-3">
+                    <span className="text-sm font-medium text-gray-900">Request email notification when found</span>
+                    <p className="text-xs text-gray-600 mt-1">
+                      By checking this box, you consent to receive email notifications if a matching item is found. 
+                      Your contact information may be shared with the finder for verification purposes.
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
 
             <button
               type="submit"

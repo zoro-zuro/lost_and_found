@@ -17,6 +17,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
 app.use('/api/lost', require('./routes/lost'));
 app.use('/api/found', require('./routes/found'));
 app.use('/api/interests', require('./routes/interests'));

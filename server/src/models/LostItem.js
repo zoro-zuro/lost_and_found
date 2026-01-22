@@ -46,6 +46,32 @@ const lostItemSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  
+  // Visibility and moderation fields
+  visibility: {
+    type: String,
+    enum: ['ADMIN_ONLY', 'CAMPUS'],
+    default: 'CAMPUS'
+  },
+  notifyRequested: {
+    type: Boolean,
+    default: false
+  },
+  reviewStatus: {
+    type: String,
+    enum: ['PENDING_REVIEW', 'APPROVED', 'REJECTED'],
+    default: 'PENDING_REVIEW'
+  },
+  publishStatus: {
+    type: String,
+    enum: ['DRAFT', 'PUBLISHED'],
+    default: 'DRAFT'
+  },
+  adminNote: {
+    type: String,
+    trim: true
+  },
+  
   status: {
     type: String,
     enum: ['OPEN', 'MATCHED', 'CLOSED'],
@@ -55,8 +81,25 @@ const lostItemSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Pre-save middleware to set initial review/publish status
+lostItemSchema.pre('save', function(next) {
+  if (this.isNew) {
+    // If visibility is ADMIN_ONLY and no notification requested
+    if (this.visibility === 'ADMIN_ONLY' && !this.notifyRequested) {
+      this.reviewStatus = 'APPROVED';
+      this.publishStatus = 'DRAFT';
+    } else {
+      // If CAMPUS visibility OR notification requested
+      this.reviewStatus = 'PENDING_REVIEW';
+      this.publishStatus = 'DRAFT';
+    }
+  }
+  next();
+});
+
 // Index for better query performance
 lostItemSchema.index({ userId: 1, createdAt: -1 });
 lostItemSchema.index({ category: 1, itemName: 'text', description: 'text' });
+lostItemSchema.index({ publishStatus: 1, visibility: 1, reviewStatus: 1 });
 
 module.exports = mongoose.model('LostItem', lostItemSchema);
