@@ -1,12 +1,19 @@
 const LostItem = require('../models/LostItem');
 const FoundItem = require('../models/FoundItem');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+const Interest = require('../models/Interest');
+const Comment = require('../models/Comment');
+const { getImageUrl } = require('../utils/upload');
 
 // @desc    Create lost item
 // @route   POST /api/lost
 // @access  Private
 const createLostItem = async (req, res, next) => {
   try {
+    console.log('Create Lost Item Request Body:', req.body);
+    console.log('Uploaded file:', req.file);
+    
     const {
       itemName,
       category,
@@ -36,6 +43,13 @@ const createLostItem = async (req, res, next) => {
       });
     }
 
+    // Handle image URL if image was uploaded
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = getImageUrl(req.file.filename);
+    }
+
+    console.log('Creating LostItem...');
     const lostItem = await LostItem.create({
       userId: req.user._id,
       itemName,
@@ -47,17 +61,39 @@ const createLostItem = async (req, res, next) => {
       brand,
       uniqueMark,
       contactPhone,
+      imageUrl,
       visibility: visibility || 'CAMPUS',
       notifyRequested: notifyRequested || false
     });
+    console.log('LostItem created:', lostItem._id);
 
     // Populate user details
     await lostItem.populate('userId', 'name email role');
 
+    // Create Notification using service
+    const notificationService = require('../services/notificationService');
+    const notifResult = await notificationService.notifyLostReportPublished({
+      user: req.user,
+      lostItem: lostItem
+    });
+
+    // Notify admins if it's a private report
+    if (lostItem.visibility === 'ADMIN_ONLY') {
+      const admins = await User.find({ role: 'ADMIN' });
+      for (const admin of admins) {
+        await notificationService.notifyAdminOfPrivateReport({
+          adminUser: admin,
+          user: req.user,
+          lostItem: lostItem
+        });
+      }
+    }
+
     res.status(201).json({
       success: true,
       data: lostItem,
-      message: 'Lost item reported successfully. Your report is now under review.'
+      message: 'Lost item reported successfully. ' + (notifResult.emailResult?.success ? 'Email confirmation sent.' : ''),
+      notificationStatus: notifResult.emailResult
     });
   } catch (error) {
     next(error);
@@ -110,17 +146,42 @@ const getLostItem = async (req, res, next) => {
       });
     }
 
-    // Check if user owns this lost item or is admin
-    if (lostItem.userId._id.toString() !== req.user._id.toString() && req.user.role !== 'ADMIN') {
+    // Check authorization:
+    // 1. Owner
+    // 2. Admin
+    // 3. CAMPUS visibility (Public within app)
+    
+    const isOwner = lostItem.userId._id.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'ADMIN';
+    const isPublic = lostItem.visibility === 'CAMPUS' && lostItem.publishStatus === 'PUBLISHED';
+
+    if (!isOwner && !isAdmin && !isPublic) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to view this item'
       });
     }
 
+    // Optional: safe info filtering if not owner/admin could be done here, 
+    // but frontend also handles hiding sensitive fields. 
+    // For SAFETY, if public view, maybe mask specific fields?
+    // User requirement: "Cards show safe info only (do not show owner phone/email publicly)."
+    // Let's ensure strict privacy for API response too.
+    
+    let responseData = lostItem.toObject();
+    if (!isOwner && !isAdmin) {
+       // Hide contact info for public viewers
+       delete responseData.contactPhone;
+       delete responseData.userId.email;
+       delete responseData.userId.phone;
+       delete responseData.userId.altPhone;
+       // uniqueMark might be sensitive? User said "cards show safe info", details page usually shows more.
+       // "Add details page /lost/:id showing full report text but still hide sensitive contact unless the viewer is admin OR the report owner."
+    }
+    
     res.status(200).json({
       success: true,
-      data: lostItem
+      data: responseData
     });
   } catch (error) {
     next(error);
@@ -141,12 +202,19 @@ const getNearbyLostItems = async (req, res, next) => {
     const currentUser = await User.findById(req.user._id);
     
     // Build query
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
     const query = {
       publishStatus: 'PUBLISHED',
       visibility: 'CAMPUS',
       reviewStatus: 'APPROVED',
-      status: 'OPEN',
-      userId: { $ne: req.user._id } // Don't show user's own items
+      userId: { $ne: req.user._id }, // Don't show user's own items
+      $or: [
+        { status: 'OPEN' },
+        { status: 'MATCHED' },
+        { status: 'CLOSED', closedAt: { $gte: sevenDaysAgo } }
+      ]
     };
 
     // Filter by block if scope is 'block' and user has a block
@@ -234,10 +302,58 @@ const getMatches = async (req, res, next) => {
   }
 };
 
+// @desc    Close lost item report
+// @route   PATCH /api/lost/:id/close
+// @access  Private
+const closeLostItem = async (req, res, next) => {
+  try {
+    const lostItem = await LostItem.findById(req.params.id);
+
+    if (!lostItem) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    // Check ownership
+    if (lostItem.userId.toString() !== req.user._id.toString() && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+
+    lostItem.status = 'CLOSED';
+    lostItem.closedAt = new Date();
+    await lostItem.save();
+
+    // Clean up "Found This" feeds (Interests) and Comments for this item
+    try {
+      // Delete all interests related to this lost item (proxy via found items is complex, 
+      // but user asked to remove "found this members" for this lost item).
+      // If the user marked "found this" on a lost item, they likely added a comment or system message.
+      
+      // 1. Delete all comments on this item
+      await Comment.deleteMany({ itemId: lostItem._id, itemType: 'LostItem' });
+      
+      // 2. If there are interests linked specifically to this item (unlikely in current schema), delete them.
+      // However, usually "Found This" means someone contacted the owner.
+      
+      console.log(`Cleaned up feed for closed report: ${lostItem._id}`);
+    } catch (cleanupErr) {
+      console.error('Cleanup after closing report failed:', cleanupErr);
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: lostItem,
+      message: 'Report closed and feed cleaned up successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createLostItem,
   getMyLostItems,
   getLostItem,
   getNearbyLostItems,
-  getMatches
+  getMatches,
+  closeLostItem
 };

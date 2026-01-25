@@ -46,6 +46,10 @@ const lostItemSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  imageUrl: {
+    type: String,
+    trim: true
+  },
   
   // Visibility and moderation fields
   visibility: {
@@ -76,25 +80,25 @@ const lostItemSchema = new mongoose.Schema({
     type: String,
     enum: ['OPEN', 'MATCHED', 'CLOSED'],
     default: 'OPEN'
+  },
+  closedAt: {
+    type: Date
   }
 }, {
   timestamps: true
 });
 
 // Pre-save middleware to set initial review/publish status
-lostItemSchema.pre('save', function(next) {
+lostItemSchema.pre('save', async function() {
   if (this.isNew) {
-    // If visibility is ADMIN_ONLY and no notification requested
-    if (this.visibility === 'ADMIN_ONLY' && !this.notifyRequested) {
-      this.reviewStatus = 'APPROVED';
-      this.publishStatus = 'DRAFT';
-    } else {
-      // If CAMPUS visibility OR notification requested
-      this.reviewStatus = 'PENDING_REVIEW';
-      this.publishStatus = 'DRAFT';
-    }
+    // Logic UPDATED per user request:
+    // ALL reports are immediately APPROVED and PUBLISHED (no review process).
+    // Visibility (CAMPUS vs ADMIN_ONLY) is handled by query filters in the controllers.
+    
+    this.reviewStatus = 'APPROVED'; 
+    this.publishStatus = 'PUBLISHED'; 
+
   }
-  next();
 });
 
 // Index for better query performance

@@ -2,6 +2,9 @@ const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
+  // Log to console for dev
+  console.error(err);
+
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
     const message = 'Resource not found';
@@ -22,7 +25,8 @@ const errorHandler = (err, req, res, next) => {
 
   res.status(error.statusCode || 500).json({
     success: false,
-    error: error.message || 'Server Error'
+    message: error.message || 'Server Error',
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack
   });
 };
 

@@ -3,6 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import Card from '../components/Card';
 import LoadingSpinner from '../components/LoadingSpinner';
+import CommentSection from '../components/CommentSection';
+import PageHeader from '../components/PageHeader';
+import Badge from '../components/Badge';
+import Toast from '../components/Toast';
 import API from '../services/api';
 
 const ReportDetails = () => {
@@ -10,6 +14,8 @@ const ReportDetails = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [report, setReport] = useState(null);
+  const [toast, setToast] = useState(null);
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
     fetchReportDetails();
@@ -26,241 +32,145 @@ const ReportDetails = () => {
     }
   };
 
+  const handleCloseReport = async () => {
+    if (!window.confirm('Are you sure you want to close this report?')) return;
+    
+    try {
+      const res = await API.patch(`/api/lost/${id}/close`);
+      setReport(res.data.data);
+      setToast({ message: 'Report resolved successfully', type: 'success' });
+    } catch (err) {
+      setToast({ message: 'Action failed', type: 'error' });
+    }
+  };
+
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: 'numeric', month: 'long', day: 'numeric'
     });
   };
 
-  const getStatusDetails = () => {
-    if (!report) return [];
-
-    const timeline = [
-      {
-        label: 'Submitted',
-        status: 'completed',
-        date: report.createdAt,
-        icon: '✓'
-      }
-    ];
-
-    if (report.reviewStatus === 'PENDING_REVIEW') {
-      timeline.push({
-        label: 'Under Review',
-        status: 'current',
-        icon: '⏳'
-      });
-      timeline.push({
-        label: 'Approved',
-        status: 'pending',
-        icon: '○'
-      });
-    } else if (report.reviewStatus === 'APPROVED') {
-      timeline.push({
-        label: 'Approved',
-        status: 'completed',
-        date: report.updatedAt,
-        icon: '✓'
-      });
-    } else if (report.reviewStatus === 'REJECTED') {
-      timeline.push({
-        label: 'Rejected',
-        status: 'rejected',
-        date: report.updatedAt,
-        icon: '✕'
-      });
-      return timeline;
-    }
-
-    if (report.publishStatus === 'PUBLISHED' && report.visibility === 'CAMPUS') {
-      timeline.push({
-        label: 'Published',
-        status: 'completed',
-        date: report.updatedAt,
-        icon: '✓'
-      });
-    } else if (report.reviewStatus === 'APPROVED' && report.publishStatus === 'DRAFT') {
-      timeline.push({
-        label: 'Ready to Publish',
-        status: 'pending',
-        icon: '○'
-      });
-    }
-
-    return timeline;
+  const getStatusBadge = () => {
+    if (report.status === 'CLOSED') return <Badge variant="success">RESOLVED</Badge>;
+    if (report.status === 'MATCHED') return <Badge variant="primary">MATCHED</Badge>;
+    return <Badge variant="warning">SEARCHING</Badge>;
   };
 
-  if (loading) {
-    return (
-      <AppLayout>
-        <LoadingSpinner />
-      </AppLayout>
-    );
-  }
+  if (loading) return <AppLayout><div className="py-24 flex justify-center"><LoadingSpinner /></div></AppLayout>;
+  if (!report) return <AppLayout><div className="text-center py-24 text-muted-text">Entry not found</div></AppLayout>;
 
-  if (!report) {
-    return (
-      <AppLayout>
-        <div className="text-center py-12">
-          <p className="text-gray-500">Report not found</p>
-          <button onClick={() => navigate('/reports')} className="btn-primary mt-4">
-            Back to Reports
-          </button>
-        </div>
-      </AppLayout>
-    );
-  }
-
-  const timeline = getStatusDetails();
+  const currentUserId = user.id || user._id;
+  const reportOwnerId = report.userId?._id || report.userId;
+  const isOwner = currentUserId && reportOwnerId && String(currentUserId) === String(reportOwnerId);
 
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <button
-            onClick={() => navigate('/reports')}
-            className="text-primary-600 hover:text-primary-700 flex items-center text-sm font-medium mb-4"
-          >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to My Reports
-          </button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Report Details</h1>
+      <div className="mb-10">
+        <button
+          onClick={() => window.history.back()}
+          className="text-primary hover:underline flex items-center text-[12px] font-black uppercase tracking-widest gap-2 mb-8 bg-primary/5 px-4 py-2 rounded-[12px] w-fit"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          Back to Previous
+        </button>
+
+        <PageHeader 
+          title={report.itemName}
+          subtitle={`Reported on ${formatDate(report.createdAt)}`}
+          action={
+            <div className="flex items-center gap-4">
+              {getStatusBadge()}
+              {isOwner && report.status !== 'CLOSED' && (
+                <button 
+                  onClick={handleCloseReport} 
+                  className="btn-success btn-md"
+                >
+                  Resolve Case
+                </button>
+              )}
+            </div>
+          }
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in pb-20">
+        <div className="lg:col-span-2 space-y-8">
+          <Card className="p-6 !rounded-[16px] border-border/10 shadow-sm bg-surface relative overflow-hidden">
+            {report.imageUrl && (
+              <div className="mb-8 -mx-8 -mt-8 h-80 overflow-hidden border-b border-border/50">
+                <img src={report.imageUrl} alt={report.itemName} className="w-full h-full object-cover" />
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-10 relative z-10">
+              <div>
+                <label className="text-[10px] font-bold text-muted-text tracking-widest uppercase block mb-1">Category</label>
+                <p className="text-h2 text-text font-bold">{report.category}</p>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-muted-text tracking-widest uppercase block mb-1">Date Missing</label>
+                <p className="text-h2 text-text font-bold">{new Date(report.dateLost).toLocaleDateString()}</p>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-[10px] font-bold text-muted-text tracking-widest uppercase block mb-2">Last Seen At</label>
+                <div className="p-3 bg-bg rounded-[12px] border border-border inline-flex items-center gap-2">
+                   <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg></div>
+                   <p className="text-body text-text font-bold">{report.locationLost}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 pt-8 border-t border-border">
+              <label className="text-[10px] font-bold text-muted-text tracking-widest uppercase block mb-3">Item Description</label>
+              <div className="bg-bg/40 p-6 rounded-[16px] border border-border/50">
+                <p className="text-body text-text leading-relaxed whitespace-pre-wrap font-medium">{report.description}</p>
+              </div>
+            </div>
+            
+            {report.contactPhone && (
+               <div className="mt-8 p-5 bg-primary/5 rounded-[20px] border border-primary/10 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-[14px] bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-primary uppercase tracking-widest block mb-1">Contact Number</label>
+                    <p className="text-h2 text-text font-bold">{report.contactPhone}</p>
+                  </div>
+               </div>
+            )}
+          </Card>
+
+          <CommentSection itemId={id} itemType="LostItem" />
         </div>
 
-        {/* Timeline */}
-        <Card className="p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Status Timeline</h2>
-          <div className="relative">
-            {timeline.map((step, index) => (
-              <div key={index} className="flex items-start mb-8 last:mb-0 relative">
-                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step.status === 'completed' ? 'bg-green-100 text-green-600' :
-                  step.status === 'current' ? 'bg-blue-100 text-blue-600' :
-                  step.status === 'rejected' ? 'bg-red-100 text-red-600' :
-                  'bg-gray-100 text-gray-400'
-                }`}>
-                  {step.icon}
+        <div className="lg:col-span-1 space-y-6">
+          <Card className="p-6 !rounded-[16px] border-border/10 shadow-sm overflow-hidden relative bg-surface">
+             <h4 className="text-[10px] font-bold text-muted-text uppercase tracking-widest mb-6 border-b border-border pb-3">Reported By</h4>
+             <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-[16px] bg-primary/10 text-primary flex items-center justify-center font-bold text-h1 uppercase border border-primary/5">
+                   {report.userId?.name?.charAt(0) || '?'}
                 </div>
-                <div className="ml-4 flex-1">
-                  <p className={`text-sm font-medium ${
-                    step.status === 'completed' || step.status === 'current' ? 'text-gray-900' : 'text-gray-500'
-                  }`}>
-                    {step.label}
-                  </p>
-                  {step.date && (
-                    <p className="text-xs text-gray-500 mt-1">{formatDate(step.date)}</p>
-                  )}
-                </div>
-                {index < timeline.length - 1 && (
-                  <div className={`absolute left-5 top-10 w-0.5 h-8 ${
-                    step.status === 'completed' ? 'bg-green-200' : 'bg-gray-200'
-                  }`} style={{ transform: 'translateX(-50%)' }} />
-                )}
-              </div>
-            ))}
-          </div>
-          
-          {report.adminNote && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h3 className="text-sm font medium text-gray-700 mb-2">Admin Note:</h3>
-              <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">{report.adminNote}</p>
-            </div>
-          )}
-        </Card>
-
-        {/* Item Details */}
-        <Card className="p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Item Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-medium text-gray-500">Item Name</label>
-              <p className="text-gray-900 mt-1">{report.itemName}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Category</label>
-              <p className="text-gray-900 mt-1">{report.category}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Date Lost</label>
-              <p className="text-gray-900 mt-1">{new Date(report.dateLost).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Location Lost</label>
-              <p className="text-gray-900 mt-1">{report.locationLost}</p>
-            </div>
-            {report.color && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">Color</label>
-                <p className="text-gray-900 mt-1">{report.color}</p>
-              </div>
-            )}
-            {report.brand && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">Brand</label>
-                <p className="text-gray-900 mt-1">{report.brand}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-6">
-            <label className="text-sm font-medium text-gray-500">Description</label>
-            <p className="text-gray-900 mt-2 whitespace-pre-wrap">{report.description}</p>
-          </div>
-
-          {report.uniqueMark && (
-            <div className="mt-4">
-              <label className="text-sm font-medium text-gray-500">Unique Markings</label>
-              <p className="text-gray-900 mt-2 whitespace-pre-wrap">{report.uniqueMark}</p>
-            </div>
-          )}
-        </Card>
-
-        {/* Settings */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Report Settings</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-700">Visibility</p>
-                <p className="text-xs text-gray-500">Who can see this report</p>
-              </div>
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                report.visibility === 'CAMPUS' ? 'bg-cyan-100 text-cyan-800' : 'bg-purple-100 text-purple-800'
-              }`}>
-                {report.visibility === 'CAMPUS' ? 'Campus Wide' : 'Admin Only'}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-700">Notification Requested</p>
-                <p className="text-xs text-gray-500">Email notification when found</p>
-              </div>
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                report.notifyRequested ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-              }`}>
-                {report.notifyRequested ? 'Yes' : 'No'}
-              </span>
-            </div>
-
-            {report.contactPhone && (
-              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Contact Phone</p>
-                  <p className="text-xs text-gray-500">For verification</p>
+                   <p className="text-h2 text-text font-bold">{report.userId?.name || 'Anonymous'}</p>
+                   <p className="text-[11px] text-primary font-bold uppercase tracking-tight">{report.userId?.role || 'STUDENT'}</p>
+                   <p className="text-small text-muted-text font-medium">{report.userId?.block || 'Main Campus'}</p>
                 </div>
-                <span className="text-sm text-gray-900">{report.contactPhone}</span>
-              </div>
-            )}
-          </div>
-        </Card>
+             </div>
+          </Card>
+
+          <Card className="p-6 bg-warning/5 border-warning/10 !rounded-[24px]">
+             <h4 className="text-label text-text mb-3 text-warning flex items-center gap-2 font-bold uppercase tracking-widest text-[10px]">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Safety Notice
+             </h4>
+             <p className="text-small text-muted-text leading-relaxed font-medium font-sans">
+                Arrange exchanges in high-traffic campus zones with security present.
+             </p>
+          </Card>
+        </div>
       </div>
+      
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </AppLayout>
   );
 };

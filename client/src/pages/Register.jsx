@@ -1,354 +1,136 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Input from '../components/Input';
+import Card from '../components/Card';
 import API from '../services/api';
 
 const Register = () => {
-  const [activeTab, setActiveTab] = useState('STUDENT'); // STUDENT or STAFF
+  const [activeTab, setActiveTab] = useState('STUDENT'); 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'STUDENT',
-    // Student fields
-    registerNumber: '',
-    block: '',
-    department: '',
-    // Staff fields
-    staffId: '',
-    staffSecret: '',
-    // Common optional
-    phone: '',
-    altPhone: ''
+    name: '', email: '', password: '', role: 'STUDENT',
+    registerNumber: '', block: '', department: '',
+    staffId: '', staffSecret: '', phone: '', altPhone: ''
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
-  // AMC email validation
   const validateEmail = (email) => {
     const amcEmailRegex = /^[a-z0-9]+@americancollege\.edu\.in$/i;
-    if (!amcEmailRegex.test(email)) {
-      return 'Email must be a valid AMC college email (e.g., 23bit15@americancollege.edu.in)';
-    }
-    return '';
+    return amcEmailRegex.test(email) ? '' : 'Please use your AMC institutional email.';
   };
 
   const onChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: '' });
-    }
+    if (errors[name]) setErrors({ ...errors, [name]: '' });
   };
 
   const switchTab = (tab) => {
     setActiveTab(tab);
-    setFormData({
-      ...formData,
-      role: tab,
-      // Clear role-specific fields when switching
-      registerNumber: '',
-      block: '',
-      department: tab === 'STUDENT' ? '' : formData.department,
-      staffId: '',
-      staffSecret: ''
-    });
+    setFormData({ ...formData, role: tab, registerNumber: '', block: '', staffId: '', staffSecret: '' });
     setErrors({});
-    setSuccessMessage('');
   };
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-
-    const emailError = validateEmail(formData.email);
-    if (emailError) {
-      newErrors.email = emailError;
-    }
-
-    if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
+    if (!formData.name.trim()) newErrors.name = 'Required';
+    const emailErr = validateEmail(formData.email);
+    if (emailErr) newErrors.email = emailErr;
+    if (formData.password.length < 6) newErrors.password = 'Min 6 characters';
+    
     if (activeTab === 'STUDENT') {
-      if (!formData.registerNumber.trim()) {
-        newErrors.registerNumber = 'Register number is required';
-      }
-      if (!formData.block.trim()) {
-        newErrors.block = 'Block/Hall is required';
-      }
-      if (!formData.department.trim()) {
-        newErrors.department = 'Department is required';
-      }
+      if (!formData.registerNumber) newErrors.registerNumber = 'Required';
+      if (!formData.block) newErrors.block = 'Required';
+      if (!formData.department) newErrors.department = 'Required';
     } else {
-      // STAFF or ADMIN
-      if (!formData.staffId.trim()) {
-        newErrors.staffId = 'Staff ID is required';
-      }
-      if (!formData.staffSecret.trim()) {
-        newErrors.staffSecret = 'Staff registration code is required';
-      }
+      if (!formData.staffId) newErrors.staffId = 'Required';
+      if (!formData.staffSecret) newErrors.staffSecret = 'Required';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     setLoading(true);
-    setSuccessMessage('');
-
     try {
       const res = await API.post('/api/auth/register', formData);
-      
       localStorage.setItem('token', res.data.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.data.user));
-      
-      if (activeTab === 'STAFF' || activeTab === 'ADMIN') {
-        setSuccessMessage(res.data.message || 'Account created! Awaiting admin approval.');
-        setTimeout(() => navigate('/login'), 3000);
-      } else {
-        navigate('/dashboard');
-      }
+      setSuccessMessage('Welcome to the AMC community!');
+      setTimeout(() => navigate('/dashboard'), 1500);
     } catch (err) {
-      setErrors({ 
-        submit: err.response?.data?.message || 'Registration failed. Please try again.' 
-      });
+      setErrors({ submit: err.response?.data?.message || 'Registration failed.' });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        <div className="glass-card p-8">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-              <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
+    <div className="min-h-screen bg-bg flex items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed">
+      <div className="w-full max-w-[680px] animate-fade-in py-12 relative z-10">
+        <Card className="p-10 !rounded-[40px] border-border/10 shadow-2xl">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 text-primary rounded-[20px] mb-4 border border-primary/5">
+               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-            <p className="text-gray-600">Join American College Lost & Found</p>
+            <h1 className="text-display text-text uppercase tracking-widest">New Identity</h1>
+            <p className="text-label text-muted-text font-medium opacity-70">Register for the AMC Institutional Portal</p>
           </div>
 
-          {/* Tabs */}
-          <div className="flex border-b border-gray-200 mb-6">
-            <button
-              onClick={() => switchTab('STUDENT')}
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-all ${
-                activeTab === 'STUDENT'
-                  ? 'text-primary-600 border-b-2 border-primary-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Student
-            </button>
-            <button
-              onClick={() => switchTab('STAFF')}
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-all ${
-                activeTab === 'STAFF'
-                  ? 'text-primary-600 border-b-2 border-primary-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Staff / Admin
-            </button>
+          <div className="flex bg-bg p-1.5 rounded-[16px] border border-border h-[52px] mb-10">
+            <button onClick={() => switchTab('STUDENT')} className={`flex-1 rounded-[12px] text-label font-bold transition-all ${activeTab === 'STUDENT' ? 'bg-surface text-primary shadow-sm' : 'text-muted-text hover:text-text'}`}>STUDENT</button>
+            <button onClick={() => switchTab('STAFF')} className={`flex-1 rounded-[12px] text-label font-bold transition-all ${activeTab === 'STAFF' ? 'bg-surface text-primary shadow-sm' : 'text-muted-text hover:text-text'}`}>STAFF</button>
           </div>
 
-          <form onSubmit={onSubmit} className="space-y-6">
-            {/* Common Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Full Name"
-                name="name"
-                value={formData.name}
-                onChange={onChange}
-                placeholder="John Doe"
-                required
-                error={errors.name}
-              />
-
-              <Input
-                label="AMC Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={onChange}
-                placeholder="23bit15@americancollege.edu.in"
-                required
-                error={errors.email}
-              />
+          <form onSubmit={onSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Input label="Full Name" name="name" value={formData.name} onChange={onChange} placeholder="John Doe" required error={errors.name} />
+              <Input label="Institutional Email" name="email" type="email" value={formData.email} onChange={onChange} placeholder="e.g. name@amaericancollege..." required error={errors.email} />
             </div>
 
-            {/* Student-specific Fields */}
-            {activeTab === 'STUDENT' && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input
-                    label="Register Number"
-                    name="registerNumber"
-                    value={formData.registerNumber}
-                    onChange={onChange}
-                    placeholder="23BIT15"
-                    required
-                    error={errors.registerNumber}
-                  />
-
-                  <Input
-                    label="Block / Hall"
-                    name="block"
-                    value={formData.block}
-                    onChange={onChange}
-                    placeholder="e.g., Washburn Hall"
-                    required
-                    error={errors.block}
-                  />
+            {activeTab === 'STUDENT' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
+                <Input label="Register Number" name="registerNumber" value={formData.registerNumber} onChange={onChange} placeholder="23BIT15" required error={errors.registerNumber} />
+                <Input label="Block / Hall" name="block" value={formData.block} onChange={onChange} placeholder="Washburn Hall" required error={errors.block} />
+                <div className="md:col-span-2">
+                  <Input label="Department" name="department" value={formData.department} onChange={onChange} placeholder="Computer Science" required error={errors.department} />
                 </div>
-
-                <Input
-                  label="Department"
-                  name="department"
-                  value={formData.department}
-                  onChange={onChange}
-                  placeholder="e.g., Computer Science"
-                  required
-                  error={errors.department}
-                />
-              </>
-            )}
-
-            {/* Staff/Admin-specific Fields */}
-            {(activeTab === 'STAFF' || activeTab === 'ADMIN') && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input
-                    label="Staff ID / Employee Number"
-                    name="staffId"
-                    value={formData.staffId}
-                    onChange={onChange}
-                    placeholder="EMP001"
-                    required
-                    error={errors.staffId}
-                  />
-
-                  <Input
-                    label="Department (Optional)"
-                    name="department"
-                    value={formData.department}
-                    onChange={onChange}
-                    placeholder="e.g., Administration"
-                    error={errors.department}
-                  />
+              </div>
+            ) : (
+              <div className="space-y-8 animate-fade-in">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <Input label="Staff/Emp ID" name="staffId" value={formData.staffId} onChange={onChange} placeholder="EMP001" required error={errors.staffId} />
+                  <Input label="Department" name="department" value={formData.department} onChange={onChange} placeholder="Administration" />
                 </div>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <p className="text-sm text-yellow-800 mb-2">
-                    <strong>Staff Registration:</strong> You need a staff registration code. Contact the administrator to obtain this code.
-                  </p>
-                  <Input
-                    label="Staff Registration Code"
-                    name="staffSecret"
-                    type="password"
-                    value={formData.staffSecret}
-                    onChange={onChange}
-                    placeholder="Enter code"
-                    required
-                    error={errors.staffSecret}
-                  />
+                <div className="p-6 bg-primary/5 border border-primary/10 rounded-[24px]">
+                   <Input label="Registration Secret" name="staffSecret" type="password" value={formData.staffSecret} onChange={onChange} placeholder="Required for staff/admin" required error={errors.staffSecret} />
                 </div>
-              </>
-            )}
-
-            {/* Password */}
-            <Input
-              label="Password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={onChange}
-              placeholder="••••••••"
-              required
-              minLength={6}
-              error={errors.password}
-            />
-
-            {/* Optional Contact Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Phone (Optional)"
-                name="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={onChange}
-                placeholder="+91 98765 43210"
-              />
-
-              <Input
-                label="Alternate Phone (Optional)"
-                name="altPhone"
-                type="tel"
-                value={formData.altPhone}
-                onChange={onChange}
-                placeholder="+91 98765 43210"
-              />
-            </div>
-
-            {/* Error Message */}
-            {errors.submit && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {errors.submit}
               </div>
             )}
 
-            {/* Success Message */}
-            {successMessage && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
-                {successMessage}
-              </div>
-            )}
+            <Input label="Setup Password" name="password" type="password" value={formData.password} onChange={onChange} placeholder="••••••••" required error={errors.password} />
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating account...
-                </span>
-              ) : (
-                'Create Account'
-              )}
+            {errors.submit && <div className="p-4 bg-danger/5 border border-danger/20 rounded-[16px] text-danger text-small font-bold text-center uppercase">{errors.submit}</div>}
+            {successMessage && <div className="p-4 bg-success/5 border border-success/20 rounded-[16px] text-success text-small font-bold text-center uppercase">{successMessage}</div>}
+
+            <button type="submit" disabled={loading} className="btn-primary btn-xl w-full">
+              {loading ? 'Generating account...' : 'Finalize Registration'}
             </button>
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="font-medium text-primary-600 hover:text-primary-700 transition-colors">
-                Sign in
-              </Link>
+          <div className="mt-10 text-center pt-8 border-t border-border">
+            <p className="text-small text-muted-text font-medium">
+              Already a member?{' '}
+              <Link to="/login" className="font-bold text-primary hover:underline transition-colors ml-1 uppercase text-[11px] tracking-widest">Sign In</Link>
             </p>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

@@ -7,8 +7,12 @@ import Profile from './pages/Profile';
 import MyReports from './pages/MyReports';
 import ReportDetails from './pages/ReportDetails';
 import ReportLost from './pages/ReportLost';
+import ReportFound from './pages/ReportFound';
+import LostFeed from './pages/LostFeed';
 import FoundItems from './pages/FoundItems';
 import FoundItemDetails from './pages/FoundItemDetails';
+import MyClaims from './pages/MyClaims';
+import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -59,6 +63,30 @@ function App() {
             } 
           />
           <Route 
+            path="/lost" 
+            element={
+              <ProtectedRoute>
+                <LostFeed />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/lost/:id" 
+            element={
+              <ProtectedRoute>
+                <ReportDetails />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/found/report" 
+            element={
+              <ProtectedRoute>
+                <ReportFound />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/found" 
             element={
               <ProtectedRoute>
@@ -74,6 +102,23 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/my-claims" 
+            element={
+              <ProtectedRoute>
+                <MyClaims />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>

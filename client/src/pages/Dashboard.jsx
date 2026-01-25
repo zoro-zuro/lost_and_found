@@ -4,6 +4,9 @@ import AppLayout from '../components/AppLayout';
 import Card from '../components/Card';
 import EmptyState from '../components/EmptyState';
 import LoadingSpinner from '../components/LoadingSpinner';
+import PageHeader from '../components/PageHeader';
+import Badge from '../components/Badge';
+import LostFeed from './LostFeed';
 import API from '../services/api';
 
 const Dashboard = () => {
@@ -11,6 +14,7 @@ const Dashboard = () => {
   const [recentLostItems, setRecentLostItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,6 +33,8 @@ const Dashboard = () => {
         localStorage.removeItem('user');
         navigate('/login');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,182 +47,125 @@ const Dashboard = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusVariant = (status) => {
     switch (status) {
-      case 'OPEN':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'MATCHED':
-        return 'bg-blue-100 text-blue-800';
-      case 'CLOSED':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'OPEN': return 'warning';
+      case 'MATCHED': return 'primary';
+      case 'CLOSED': return 'success';
+      default: return 'neutral';
     }
   };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+      year: 'numeric', month: 'short', day: 'numeric'
     });
   };
 
-  if (loading && !user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-gray-50 flex items-center justify-center">
-        <LoadingSpinner text="Loading your dashboard..." size="lg" />
-      </div>
-    );
-  }
+  if (loading && !user) return <AppLayout><div className="flex justify-center items-center py-24"><LoadingSpinner /></div></AppLayout>;
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-gray-50 flex items-center justify-center">
-        <Card className="p-8 max-w-md w-full mx-4">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Something went wrong</h3>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <button
-              onClick={() => navigate('/login')}
-              className="btn-secondary"
-            >
-              Back to Login
-            </button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  if (error) return (
+    <AppLayout>
+      <Card className="p-12 max-w-md mx-auto text-center !rounded-[32px] border-danger/10">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-danger/10 text-danger rounded-[20px] mb-6"><svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+        <h3 className="text-h2 text-text mb-2 font-bold">Authentication Refused</h3>
+        <p className="text-body text-muted-text mb-8">{error}</p>
+        <button onClick={() => navigate('/login')} className="btn-primary btn-lg w-full">Back to Login</button>
+      </Card>
+    </AppLayout>
+  );
 
   return (
     <AppLayout>
-      <div className="space-y-8">
-        {/* Welcome Header */}
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.name}!
-          </h1>
-          <p className="text-xl text-gray-600">
-            Register Number: {user?.registerNumber}
-          </p>
-        </div>
+      <PageHeader 
+        title={`Welcome, ${user?.name}`}
+        subtitle={user?.role === 'STUDENT' ? `Institutional Rank: Student • ${user?.block}` : `Institutional Rank: Staff Member`}
+      />
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card hover className="p-6 text-center cursor-pointer group">
-            <Link to="/lost/report" className="block">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4 group-hover:bg-red-200 transition-colors">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Report Lost Item</h3>
-              <p className="text-gray-600">Report an item you've lost</p>
+      <div className="flex bg-surface/50 backdrop-blur-sm p-1.5 rounded-[12px] border border-border w-fit mb-10 overflow-hidden">
+        {['overview', 'help-others'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-8 h-10 rounded-[8px] text-label font-bold transition-all uppercase tracking-wide ${activeTab === tab ? 'bg-primary text-white shadow-md' : 'text-muted-text hover:text-text'}`}
+          >
+            {tab.replace('-', ' ')}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'overview' ? (
+        <div className="space-y-12 animate-fade-in">
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link to="/report-lost" className="group">
+              <Card className="p-8 text-center !rounded-[16px] border-border/10 shadow-sm bg-surface transition-all">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-danger/10 text-danger rounded-[12px] mb-4"><svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
+                <h3 className="text-h1 text-text mb-1 font-bold">Report Lost</h3>
+                <p className="text-small text-muted-text max-w-[240px] mx-auto">Register your missing items in the portal.</p>
+              </Card>
             </Link>
-          </Card>
 
-          <Card hover className="p-6 text-center cursor-pointer group">
-            <Link to="/found" className="block">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4 group-hover:bg-green-200 transition-colors">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Browse Found Items</h3>
-              <p className="text-gray-600">Search through found items</p>
+            <Link to="/found" className="group">
+              <Card className="p-8 text-center !rounded-[16px] border-border/10 shadow-sm bg-surface transition-all">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-success/10 text-success rounded-[12px] mb-4"><svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
+                <h3 className="text-h1 text-text mb-1 font-bold">Browse Gallery</h3>
+                <p className="text-small text-muted-text max-w-[240px] mx-auto">Explore all items turned in by others.</p>
+              </Card>
             </Link>
-          </Card>
-        </div>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Lost Items */}
-          <div className="lg:col-span-2">
-            <Card className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-gray-900">My Recent Lost Items</h2>
-                <Link
-                  to="/lost/report"
-                  className="text-primary-600 hover:text-primary-700 font-medium text-sm"
-                >
-                  Report New
-                </Link>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="flex justify-between items-end border-b border-border pb-3">
+                <h2 className="text-h1 text-text uppercase tracking-tight font-bold">Active Reports</h2>
+                <Link to="/reports" className="text-small text-primary font-bold hover:underline">History →</Link>
               </div>
 
               {recentLostItems.length === 0 ? (
-                <EmptyState
-                  icon={
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  }
-                  title="No Lost Items Reported"
-                  description="You haven't reported any lost items yet."
-                  action={
-                    <Link to="/lost/report" className="btn-primary">
-                      Report Your First Item
-                    </Link>
-                  }
-                />
+                <EmptyState title="No Active Reports" description="You have no current missing items in the system." />
               ) : (
-                <div className="space-y-4">
+                <div className="grid gap-3">
                   {recentLostItems.map((item) => (
-                    <div key={item._id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">{item.itemName}</h3>
-                          <p className="text-sm text-gray-600 mt-1">{item.category}</p>
-                          <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                            <span>Lost: {formatDate(item.dateLost)}</span>
-                            <span>Location: {item.locationLost}</span>
-                          </div>
-                        </div>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
-                          {item.status}
-                        </span>
+                    <Card key={item._id} className="p-5 flex justify-between items-center bg-surface !rounded-[12px] border-border/10 shadow-sm transition-all">
+                      <div>
+                        <h4 className="text-body text-text font-bold">{item.itemName}</h4>
+                        <p className="text-[11px] text-muted-text font-medium uppercase tracking-tight opacity-60">{item.category} • {item.locationLost}</p>
                       </div>
-                    </div>
+                      <Badge variant={getStatusVariant(item.status)} className="scale-90">{item.status}</Badge>
+                    </Card>
                   ))}
                 </div>
               )}
-            </Card>
-          </div>
+            </div>
 
-          {/* Tips Panel */}
-          <div className="lg:col-span-1">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Tips for Good Reports</h3>
-              <div className="space-y-3">
-                <div className="flex items-start">
-                  <span className="text-primary-600 mr-2 mt-1">•</span>
-                  <p className="text-sm text-gray-600">Be specific about brand, model, and color</p>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-primary-600 mr-2 mt-1">•</span>
-                  <p className="text-sm text-gray-600">Include unique markings or damage</p>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-primary-600 mr-2 mt-1">•</span>
-                  <p className="text-sm text-gray-600">Provide exact date and location</p>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-primary-600 mr-2 mt-1">•</span>
-                  <p className="text-sm text-gray-600">Add contact information for faster response</p>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-primary-600 mr-2 mt-1">•</span>
-                  <p className="text-sm text-gray-600">Check back regularly for matches</p>
-                </div>
-              </div>
-            </Card>
+            <div className="lg:col-span-1 space-y-6">
+              <h2 className="text-h1 text-text uppercase tracking-tight font-bold">Safety Tips</h2>
+              <Card className="p-6 bg-primary/5 border-primary/10 !rounded-[16px] space-y-5">
+                {[
+                  "Detailed descriptions speed up matching.",
+                  "Check daily for institutional findings.",
+                  "Report to Security for high-value items.",
+                  "Privacy is preserved until match found."
+                ].map((tip, i) => (
+                  <div key={i} className="flex gap-3">
+                    <div className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[9px] font-bold flex-shrink-0 mt-0.5">{i+1}</div>
+                    <p className="text-small text-muted-text font-medium leading-relaxed">{tip}</p>
+                  </div>
+                ))}
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="animate-fade-in space-y-8">
+           <div className="bg-primary/5 p-6 rounded-[16px] border border-primary/10">
+              <h2 className="text-h1 text-text mb-1 font-bold">Campus Watch</h2>
+              <p className="text-body text-muted-text">Recent missing items in <span className="text-primary font-bold">{user?.block || 'your vicinity'}</span>.</p>
+           </div>
+           <LostFeed embedded defaultScope="block" />
+        </div>
+      )}
     </AppLayout>
   );
 };

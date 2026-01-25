@@ -5,6 +5,8 @@ import Card from '../components/Card';
 import Input from '../components/Input';
 import Toast from '../components/Toast';
 import LoadingSpinner from '../components/LoadingSpinner';
+import PageHeader from '../components/PageHeader';
+import Badge from '../components/Badge';
 import API from '../services/api';
 
 const Profile = () => {
@@ -13,11 +15,8 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    altPhone: '',
-    block: '',
-    department: ''
+    name: '', phone: '', altPhone: '', block: '',
+    department: '', emailNotificationsEnabled: true, notifyScope: 'all'
   });
   const [errors, setErrors] = useState({});
   const [toast, setToast] = useState(null);
@@ -36,256 +35,145 @@ const Profile = () => {
         phone: userData.phone || '',
         altPhone: userData.altPhone || '',
         block: userData.block || '',
-        department: userData.department || ''
+        department: userData.department || '',
+        emailNotificationsEnabled: userData.emailNotificationsEnabled !== false,
+        notifyScope: userData.notifyScope || 'all'
       });
     } catch (err) {
-      setToast({
-        message: 'Failed to load profile',
-        type: 'error'
-      });
+      setToast({ message: 'Failed to load profile', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
   const onChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-
-    if (formData.phone && formData.phone.trim().length < 10) {
-      newErrors.phone = 'Phone number must be at least 10 digits';
-    }
-
-    if (formData.altPhone && formData.altPhone.trim().length < 10) {
-      newErrors.altPhone = 'Alternate phone must be at least 10 digits';
-    }
-
+    if (!formData.name.trim()) newErrors.name = 'Required';
+    if (formData.phone && formData.phone.trim().length < 10) newErrors.phone = 'Min 10 digits';
     if (user?.role === 'STUDENT') {
-      if (!formData.block || !formData.block.trim()) {
-        newErrors.block = 'Block is required for students';
-      }
-      if (!formData.department || !formData.department.trim()) {
-        newErrors.department = 'Department is required for students';
-      }
+      if (!formData.block?.trim()) newErrors.block = 'Required';
+      if (!formData.department?.trim()) newErrors.department = 'Required';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     setSaving(true);
-
     try {
       const res = await API.put('/api/users/me', formData);
-      
-      // Update localStorage
       const updatedUser = res.data.data.user;
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
-
-      setToast({
-        message: 'Profile updated successfully!',
-        type: 'success'
-      });
+      setToast({ message: 'Profile updated successfully!', type: 'success' });
     } catch (err) {
-      setToast({
-        message: err.response?.data?.message || 'Failed to update profile',
-        type: 'error'
-      });
+      setToast({ message: 'Failed to update profile', type: 'error' });
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <AppLayout>
-        <LoadingSpinner />
-      </AppLayout>
-    );
-  }
+  if (loading) return <AppLayout><div className="py-24 flex justify-center"><LoadingSpinner /></div></AppLayout>;
 
   return (
     <AppLayout>
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
-          <p className="text-gray-600">Manage your account information and contact details</p>
-        </div>
+      <div className="max-w-4xl mx-auto">
+        <PageHeader 
+          title="Account Profile"
+          subtitle="Manage your personal details and notification preferences."
+        />
 
-        <Card className="p-6 mb-6">
-          <div className="mb-6 pb-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-500">Email:</span>
-                <p className="font-medium text-gray-900">{user?.email}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+          <div className="lg:col-span-1 space-y-6">
+            <Card className="p-6 !rounded-[16px] text-center border-border/10 shadow-sm bg-surface">
+              <div className="w-20 h-20 rounded-[16px] bg-primary/10 text-primary flex items-center justify-center text-display font-bold border border-primary/5 mx-auto mb-4">
+                {user?.name?.charAt(0)}
               </div>
-              <div>
-                <span className="text-gray-500">Role:</span>
-                <p className="font-medium text-gray-900">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    user?.role === 'STUDENT' ? 'bg-blue-100 text-blue-800' :
-                    user?.role === 'STAFF' ? 'bg-purple-100 text-purple-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {user?.role}
-                  </span>
-                </p>
+              <h2 className="text-h2 text-text mb-1 font-bold">{user?.name}</h2>
+              <Badge variant={user?.role === 'ADMIN' ? 'danger' : 'primary'} className="scale-90">{user?.role}</Badge>
+              
+              <div className="mt-6 pt-6 border-t border-border space-y-4 text-left">
+                 <div>
+                    <label className="text-[10px] font-bold text-muted-text uppercase tracking-widest block mb-0.5">Email</label>
+                    <p className="text-small text-text font-semibold truncate">{user?.email}</p>
+                 </div>
+                 {user?.registerNumber && (
+                   <div>
+                      <label className="text-[10px] font-bold text-muted-text uppercase tracking-widest block mb-0.5">Register #</label>
+                      <p className="text-small text-text font-semibold">{user.registerNumber}</p>
+                   </div>
+                 )}
+                 {user?.staffId && (
+                   <div>
+                      <label className="text-[10px] font-bold text-muted-text uppercase tracking-widest block mb-0.5">Staff ID</label>
+                      <p className="text-small text-text font-semibold">{user.staffId}</p>
+                   </div>
+                 )}
               </div>
-              {user?.registerNumber && (
-                <div>
-                  <span className="text-gray-500">Register Number:</span>
-                  <p className="font-medium text-gray-900">{user.registerNumber}</p>
-                </div>
-              )}
-              {user?.staffId && (
-                <div>
-                  <span className="text-gray-500">Staff ID:</span>
-                  <p className="font-medium text-gray-900">{user.staffId}</p>
-                </div>
-              )}
-            </div>
+            </Card>
+
+            <Card className="p-6 bg-primary/5 border-primary/10 !rounded-[16px]">
+               <h3 className="text-[10px] font-bold text-primary uppercase tracking-widest mb-2">Privacy Policy</h3>
+               <p className="text-[12px] text-muted-text leading-relaxed">Your data is safe. Only relevant details are shared with verified members to facilitate returns.</p>
+            </Card>
           </div>
 
-          <form onSubmit={onSubmit} className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900">Edit Profile</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Full Name"
-                name="name"
-                value={formData.name}
-                onChange={onChange}
-                placeholder="John Doe"
-                required
-                error={errors.name}
-              />
+          <div className="lg:col-span-2 pb-20">
+            <form onSubmit={onSubmit} className="space-y-6">
+              <Card className="p-6 space-y-8 !rounded-[16px] border-border/10 shadow-sm bg-surface">
+                 <h3 className="text-h2 text-text font-bold">Edit Information</h3>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Input label="Name" name="name" value={formData.name} onChange={onChange} required error={errors.name} />
+                    <Input label="Phone" name="phone" value={formData.phone} onChange={onChange} placeholder="+91..." error={errors.phone} />
+                 </div>
 
-              <Input
-                label="Phone Number"
-                name="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={onChange}
-                placeholder="+91 98765 43210"
-                error={errors.phone}
-              />
-            </div>
+                 {user?.role === 'STUDENT' ? (
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Input label="Block" name="block" value={formData.block} onChange={onChange} required error={errors.block} />
+                      <Input label="Department" name="department" value={formData.department} onChange={onChange} required error={errors.department} />
+                   </div>
+                 ) : (
+                   <Input label="Department" name="department" value={formData.department} onChange={onChange} />
+                 )}
 
-            <Input
-              label="Alternate Phone"
-              name="altPhone"
-              type="tel"
-              value={formData.altPhone}
-              onChange={onChange}
-              placeholder="+91 98765 43210"
-              error={errors.altPhone}
-            />
+                 <div className="pt-6 border-t border-border">
+                    <h4 className="text-h2 text-text font-bold mb-4">Communications</h4>
+                    <label className="flex items-start gap-3 p-4 bg-bg rounded-[12px] border border-border cursor-pointer hover:bg-gray-50 transition-colors group">
+                       <input 
+                         type="checkbox" 
+                         name="emailNotificationsEnabled" 
+                         checked={formData.emailNotificationsEnabled} 
+                         onChange={onChange} 
+                         className="mt-1 w-5 h-5 text-primary border-border rounded" 
+                       />
+                       <div>
+                          <span className="text-small font-bold text-text block">Email Notifications</span>
+                          <span className="text-[11px] text-muted-text">Notify me about matches and messages.</span>
+                       </div>
+                    </label>
+                 </div>
+              </Card>
 
-            {user?.role === 'STUDENT' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label="Block / Hall"
-                  name="block"
-                  value={formData.block}
-                  onChange={onChange}
-                  placeholder="e.g., Washburn Hall"
-                  required
-                  error={errors.block}
-                />
-
-                <Input
-                  label="Department"
-                  name="department"
-                  value={formData.department}
-                  onChange={onChange}
-                  placeholder="e.g., Computer Science"
-                  required
-                  error={errors.department}
-                />
+              <div className="flex gap-4">
+                 <button type="button" onClick={() => navigate(-1)} className="btn-secondary px-8">Cancel</button>
+                 <button type="submit" disabled={saving} className="btn-primary flex-1 !h-12 !rounded-[10px] uppercase text-small font-black tracking-widest">
+                   {saving ? 'Synchronizing...' : 'Save Identity Changes'}
+                 </button>
               </div>
-            )}
-
-            {(user?.role === 'STAFF' || user?.role === 'ADMIN') && (
-              <Input
-                label="Department (Optional)"
-                name="department"
-                value={formData.department}
-                onChange={onChange}
-                placeholder="e.g., Administration"
-                error={errors.department}
-              />
-            )}
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex">
-                <svg className="h-5 w-5 text-blue-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-                <div className="text-sm text-blue-700">
-                  <p className="font-medium">Important: Contact Details</p>
-                  <p className="mt-1">Your phone number will be shared with users who find your lost items so they can contact you for verification and return.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                disabled={saving}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {saving ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Saving...
-                  </span>
-                ) : (
-                  'Save Changes'
-                )}
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard')}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </Card>
+            </form>
+          </div>
+        </div>
       </div>
-
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </AppLayout>
   );
 };

@@ -28,6 +28,10 @@ const foundItemSchema = new mongoose.Schema({
   imageUrl: {
     type: String,
     trim: true
+  },
+  linkedLostItemId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'LostItem'
   }
 }, {
   timestamps: true

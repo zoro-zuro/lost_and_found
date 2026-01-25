@@ -13,11 +13,11 @@ const Input = ({
   ...props 
 }) => {
   return (
-    <div className="mb-4">
+    <div className="flex flex-col gap-2">
       {label && (
-        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor={name} className="text-label text-text flex items-center gap-1">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-danger">*</span>}
         </label>
       )}
       <input
@@ -28,11 +28,11 @@ const Input = ({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
-        className={`input-field ${error ? 'border-red-500' : ''} ${className}`}
+        className={`input-field rounded-[10px] h-[44px] items-center ${error ? '!border-danger !ring-danger/20' : ''} ${className}`}
         {...props}
       />
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="text-small text-danger">{error}</p>
       )}
     </div>
   );

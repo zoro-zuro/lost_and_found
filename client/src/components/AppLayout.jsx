@@ -3,9 +3,9 @@ import Navbar from './Navbar';
 
 const AppLayout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-bg bg-pattern">
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container-custom py-12 relative z-10">
         {children}
       </main>
     </div>

@@ -20,6 +20,10 @@ const interestSchema = new mongoose.Schema({
     type: String,
     enum: ['PENDING', 'APPROVED', 'REJECTED'],
     default: 'PENDING'
+  },
+  pickupInstructions: {
+    type: String,
+    trim: true
   }
 }, {
   timestamps: true

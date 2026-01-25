@@ -1,8 +1,8 @@
 import React from 'react';
 
 const Card = ({ children, className = '', hover = false }) => {
-  const baseClasses = 'bg-white rounded-lg shadow-md border border-gray-200';
-  const hoverClasses = hover ? 'hover:shadow-lg transition-shadow duration-200' : '';
+  const baseClasses = 'card-base';
+  const hoverClasses = hover ? 'hover:border-primary/20 transition-all duration-300' : '';
   
   return (
     <div className={`${baseClasses} ${hoverClasses} ${className}`}>

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
   headers: {
     'Content-Type': 'application/json'
   }
@@ -15,5 +15,12 @@ API.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Helper function to get image URL
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  return `${baseURL}${imagePath}`;
+};
 
 export default API;

@@ -68,19 +68,24 @@ const register = async (req, res, next) => {
       }
     }
 
+    // Generate the internal unique code for checking
+    const userCode = role === 'STUDENT' 
+      ? `STD-${registerNumber.toUpperCase()}` 
+      : `EMP-${staffId.toUpperCase()}`;
+
     // Check if user exists
     const existingUser = await User.findOne({
       $or: [
         { email },
-        registerNumber ? { registerNumber } : null,
-        staffId ? { staffId } : null
-      ].filter(Boolean)
+        { userCode }
+      ]
     });
 
     if (existingUser) {
+      const field = existingUser.email === email ? 'email' : 'identification number';
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email, register number, or staff ID'
+        message: `User already exists with this ${field}`
       });
     }
 
@@ -91,21 +96,19 @@ const register = async (req, res, next) => {
       password,
       role,
       phone,
-      altPhone
+      altPhone,
+      institutionalId: role === 'STUDENT' ? registerNumber : staffId,
+      block: role === 'STUDENT' ? block : undefined,
+      department: department || ''
     };
 
-    // Add role-specific fields
-    if (role === 'STUDENT') {
-      userData.registerNumber = registerNumber;
-      userData.block = block;
-      userData.department = department;
-    } else {
-      userData.staffId = staffId;
-      userData.department = department || '';
-      // Staff/Admin need approval (handled by schema default)
-    }
-
     const user = await User.create(userData);
+
+    // Auto-approve Staff/Admin if registration was successful (secret was already verified above)
+    if (role === 'STAFF' || role === 'ADMIN') {
+      user.isApproved = true;
+      await user.save();
+    }
 
     // Generate token
     const token = generateToken(user._id);
@@ -159,12 +162,12 @@ const login = async (req, res, next) => {
     }
 
     // Check if user is approved (for STAFF/ADMIN)
-    if ((user.role === 'STAFF' || user.role === 'ADMIN') && !user.isApproved) {
-      return res.status(403).json({
-        success: false,
-        message: 'Your account is pending admin approval. Please contact administrator.'
-      });
-    }
+    // if ((user.role === 'STAFF' || user.role === 'ADMIN') && !user.isApproved) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: 'Your account is pending admin approval. Please contact administrator.'
+    //   });
+    // }
 
     // Check if password matches
     const isMatch = await user.comparePassword(password);

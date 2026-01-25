@@ -34,16 +34,21 @@ const userSchema = new mongoose.Schema({
     default: 'STUDENT'
   },
   
-  // Student-specific fields
-  registerNumber: {
+  // Single internal field for raw ID (Register Number or Staff ID)
+  institutionalId: {
     type: String,
-    trim: true,
-    sparse: true,
-    unique: true,
-    required: function() {
-      return this.role === 'STUDENT';
-    }
+    required: [true, 'Institutional ID is required'],
+    trim: true
   },
+
+  // Unique composite field (STD-ID or EMP-ID)
+  userCode: {
+    type: String,
+    unique: true,
+    trim: true
+  },
+
+  // Shared location field (Block/Hall for students)
   block: {
     type: String,
     trim: true,
@@ -52,24 +57,13 @@ const userSchema = new mongoose.Schema({
     }
   },
   
-  // Staff/Admin-specific fields
-  staffId: {
-    type: String,
-    trim: true,
-    sparse: true,
-    unique: true,
-    required: function() {
-      return this.role === 'STAFF' || this.role === 'ADMIN';
-    }
-  },
   isApproved: {
     type: Boolean,
     default: function() {
-      return this.role === 'STUDENT'; // Students auto-approved, staff/admin need approval
+      return this.role === 'STUDENT'; // Students auto-approved
     }
   },
   
-  // Common optional fields
   department: {
     type: String,
     trim: true,
@@ -84,19 +78,48 @@ const userSchema = new mongoose.Schema({
   altPhone: {
     type: String,
     trim: true
+  },
+  emailNotificationsEnabled: {
+    type: Boolean,
+    default: true
+  },
+  notifyScope: {
+    type: String,
+    enum: ['all', 'admin-only', 'none'],
+    default: 'all'
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    next();
+// Virtuals to keep frontend compatibility without changing React code
+userSchema.virtual('registerNumber').get(function() {
+  return this.role === 'STUDENT' ? this.institutionalId : undefined;
+}).set(function(v) {
+  if (this.role === 'STUDENT') this.institutionalId = v;
+});
+
+userSchema.virtual('staffId').get(function() {
+  return (this.role === 'STAFF' || this.role === 'ADMIN') ? this.institutionalId : undefined;
+}).set(function(v) {
+  if (this.role === 'STAFF' || this.role === 'ADMIN') this.institutionalId = v;
+});
+
+// Middleware to generate unique userCode and hash password
+userSchema.pre('save', async function() {
+  // Generate userCode
+  const prefix = this.role === 'STUDENT' ? 'STD' : 'EMP';
+  if (this.institutionalId) {
+    this.userCode = `${prefix}-${this.institutionalId.toUpperCase()}`;
   }
-  
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+
+  // Hash password
+  if (this.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
 });
 
 // Compare password method
@@ -104,10 +127,16 @@ userSchema.methods.comparePassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Remove password from JSON output
+// Clean JSON output
 userSchema.methods.toJSON = function() {
   const userObject = this.toObject();
   delete userObject.password;
+  // Ensure virtuals look like real fields for the frontend
+  if (this.role === 'STUDENT') {
+    userObject.registerNumber = this.institutionalId;
+  } else {
+    userObject.staffId = this.institutionalId;
+  }
   return userObject;
 };
 
