@@ -109,7 +109,9 @@ const createFoundItem = async (req, res, next) => {
     // Handle image URL if image was uploaded
     let imageUrl = null;
     if (req.file) {
-      imageUrl = getImageUrl(req.file.filename);
+      // For now, we'll skip image storage in serverless
+      // In production, you'd upload to cloud storage like Cloudinary, AWS S3, etc.
+      imageUrl = 'image-uploaded'; // Placeholder
     }
 
     const foundData = {

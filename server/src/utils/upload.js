@@ -2,24 +2,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadsDir);
-  },
-  filename: function (req, file, cb) {
-    // Create unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, 'item-' + uniqueSuffix + ext);
-  }
-});
+// For Vercel serverless, use memory storage instead of disk storage
+const storage = multer.memoryStorage();
 
 // File filter to only allow images
 const fileFilter = (req, file, cb) => {
@@ -39,19 +23,17 @@ const upload = multer({
   }
 });
 
-// Helper function to get image URL
+// Helper function to get image URL (for now, return base64 or placeholder)
 const getImageUrl = (filename) => {
   if (!filename) return null;
+  // In production, you might want to use a cloud storage service
   return `/uploads/${filename}`;
 };
 
-// Helper function to delete image file
+// Helper function to delete image file (no-op for memory storage)
 const deleteImage = (filename) => {
-  if (!filename) return;
-  const filePath = path.join(__dirname, '../../uploads', filename);
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
+  // No-op for memory storage
+  return;
 };
 
 module.exports = {

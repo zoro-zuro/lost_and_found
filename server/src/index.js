@@ -17,8 +17,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Serve static files (uploads)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve static files (uploads) - only in development
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+}
 
 // Security & Logging
 const helmet = require('helmet');
@@ -56,8 +58,13 @@ if (!process.env.MAIL_USER || !process.env.MAIL_APP_PASSWORD) {
 // Error handler
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+// For Vercel serverless
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Export for Vercel serverless
+module.exports = app;
