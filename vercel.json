@@ -7,7 +7,7 @@
   "routes": [
     {"src": "/api/(.*)", "dest": "/server/src/index.js"},
     {"src": "/uploads/(.*)", "dest": "/server/uploads/$1"},
-    {"src": "/(.*)", "dest": "/client/$1"}
+    {"src": "/(.*)", "dest": "/client/index.html"}
   ],
   "env": {"NODE_ENV": "production"}
 }
