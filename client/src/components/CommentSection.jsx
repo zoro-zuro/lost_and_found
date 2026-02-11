@@ -1,16 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import API from '../services/api';
 import Toast from './Toast';
-import UserDetailModal from './UserDetailModal';
+import UserDetailsOverlay from './UserDetailsOverlay';
+import { isUserVerified } from '../utils/verification';
+import VerificationPrompt from './VerificationPrompt';
 
-const Comment = ({ comment, allComments, onReply, setSelectedUserId, setIsModalOpen, currentUser }) => {
+const Comment = ({ comment, allComments, onReply, setSelectedUserId, setIsModalOpen, currentUser, showVerificationPrompt, setShowVerificationPrompt }) => {
   const replies = allComments.filter(c => c.parentId === comment._id);
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Function to get proper initials
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase())
+      .join('');
+  };
+
   const handleReplySubmit = async () => {
     if (!replyText.trim()) return;
+    
+    // Check if user is verified before submitting reply
+    const currentUserData = JSON.parse(localStorage.getItem('user'));
+    if (!currentUserData || !isUserVerified(currentUserData)) {
+      setShowVerificationPrompt(true);
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
       await onReply(replyText, comment._id);
@@ -54,11 +75,13 @@ const Comment = ({ comment, allComments, onReply, setSelectedUserId, setIsModalO
               setIsModalOpen(true);
             }
           }}
-          className={`w-6 h-6 rounded-sm flex items-center justify-center font-bold text-[9px] cursor-pointer shrink-0 transition-transform hover:scale-105 ${
+          className={`w-6 h-6 rounded-sm flex items-center justify-center font-bold text-[9px] shrink-0 transition-transform hover:scale-105 ${
             comment.isSystemMessage ? 'bg-primary/20 text-primary' : 'bg-muted-text/10 text-muted-text'
+          } ${
+            !comment.isSystemMessage && comment.userId?._id ? 'cursor-pointer' : 'cursor-default'
           }`}
         >
-          {comment.isSystemMessage ? 'P' : comment.userId?.name?.charAt(0).toUpperCase()}
+          {comment.isSystemMessage ? 'P' : getInitials(comment.userId?.name)}
         </div>
         <div className="flex-1 w-0.5 bg-border/40 my-1 group-last:bg-transparent"></div>
       </div>
@@ -66,8 +89,10 @@ const Comment = ({ comment, allComments, onReply, setSelectedUserId, setIsModalO
       <div className="flex-1 pb-2">
         <div className="flex items-center gap-1.5 mb-0.5">
           <span 
-            className={`text-[11px] font-bold tracking-tight cursor-pointer hover:underline ${
+            className={`text-[11px] font-bold tracking-tight ${
               comment.isSystemMessage ? 'text-primary' : 'text-text'
+            } ${
+              !comment.isSystemMessage && comment.userId?._id ? 'cursor-pointer hover:underline' : 'cursor-default'
             }`}
              onClick={() => {
               if (!comment.isSystemMessage && comment.userId?._id) {
@@ -76,7 +101,11 @@ const Comment = ({ comment, allComments, onReply, setSelectedUserId, setIsModalO
               }
             }}
           >
-            {comment.isSystemMessage ? 'System' : comment.userId?.name}
+            {comment.isSystemMessage ? 'System' : 
+             comment.userId?.name || 
+             comment.userId?.email?.split('@')[0] || 
+             'Unknown User'
+            }
           </span>
           <span className="text-[10px] text-muted-text font-medium opacity-40 uppercase">
             • {new Date(comment.createdAt).toLocaleDateString()}
@@ -137,6 +166,8 @@ const Comment = ({ comment, allComments, onReply, setSelectedUserId, setIsModalO
                 setSelectedUserId={setSelectedUserId}
                 setIsModalOpen={setIsModalOpen}
                 currentUser={currentUser}
+                showVerificationPrompt={showVerificationPrompt}
+                setShowVerificationPrompt={setShowVerificationPrompt}
               />
             ))}
           </div>
@@ -154,6 +185,7 @@ const CommentSection = ({ itemId, itemType }) => {
   const [toast, setToast] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(false);
   
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -174,6 +206,13 @@ const CommentSection = ({ itemId, itemType }) => {
 
   const handleSubmit = async (text, parentId = null) => {
     if (!text.trim()) return;
+
+    // Check if user is verified before submitting comment
+    const currentUserData = JSON.parse(localStorage.getItem('user'));
+    if (!currentUserData || !isUserVerified(currentUserData)) {
+      setShowVerificationPrompt(true);
+      return;
+    }
 
     if (!parentId) setSubmitting(true);
     try {
@@ -211,6 +250,8 @@ const CommentSection = ({ itemId, itemType }) => {
             setSelectedUserId={setSelectedUserId}
             setIsModalOpen={setIsModalOpen}
             currentUser={user}
+            showVerificationPrompt={showVerificationPrompt}
+            setShowVerificationPrompt={setShowVerificationPrompt}
           />
         ))}
       </div>
@@ -237,11 +278,18 @@ const CommentSection = ({ itemId, itemType }) => {
       
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       
-      <UserDetailModal 
+      <UserDetailsOverlay 
         userId={selectedUserId}
-        isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+      
+      {/* Verification Prompt */}
+      {showVerificationPrompt && (
+        <VerificationPrompt
+          message="Please verify your email address to post messages and comments."
+          onClose={() => setShowVerificationPrompt(false)}
+        />
+      )}
     </div>
   );
 };

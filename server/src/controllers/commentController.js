@@ -10,15 +10,23 @@ const getComments = async (req, res, next) => {
   try {
     const { itemType, itemId } = req.params;
     
+    console.log('Fetching comments for:', { itemType, itemId });
+    
     const comments = await Comment.find({ itemType, itemId })
       .sort({ createdAt: 1 })
-      .populate('userId', 'name role');
+      .populate({
+        path: 'userId',
+        select: 'name email role department block phone altPhone emailVerified'
+      });
+
+    console.log('Found comments:', comments);
 
     res.status(200).json({
       success: true,
       data: comments
     });
   } catch (error) {
+    console.error('Error fetching comments:', error);
     next(error);
   }
 };
@@ -58,7 +66,10 @@ const addComment = async (req, res, next) => {
     });
 
     // Populate user for immediate display
-    await comment.populate('userId', 'name role');
+    await comment.populate({
+      path: 'userId',
+      select: 'name email role department block phone altPhone emailVerified'
+    });
 
     // Notify Item Owner using service
     let notifResult = null;

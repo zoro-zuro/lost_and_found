@@ -1,32 +1,76 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
-import MyReports from './pages/MyReports';
-import ReportDetails from './pages/ReportDetails';
-import ReportLost from './pages/ReportLost';
-import ReportFound from './pages/ReportFound';
-import LostFeed from './pages/LostFeed';
+import ManageReports from './pages/ManageReports';
+// import ReportDetails from './pages/ReportDetails';
+import ReportItem from './pages/ReportItem';
+// import LostFeed from './pages/LostFeed';
 import FoundItems from './pages/FoundItems';
 import FoundItemDetails from './pages/FoundItemDetails';
-import MyClaims from './pages/MyClaims';
-import AdminDashboard from './pages/AdminDashboard';
+import LostItemDetails from './pages/LostItemDetails';
+// import MyClaims from './pages/MyClaims';
+import AdminRoom from './pages/AdminRoom';
+import Unauthorized from './pages/Unauthorized';
+
 import ProtectedRoute from './components/ProtectedRoute';
+import GlobalLayout from './components/GlobalLayout';
 
 function App() {
   return (
     <Router>
       <div className="App">
+        <AppContent />
+      </div>
+    </Router>
+  );
+}
+
+// Separate component to use Router context
+function AppContent() {
+  const location = useLocation();
+
+  // Debug navigation and auth state
+  useEffect(() => {
+    console.log('🚀 App - Route changed to:', location.pathname);
+    
+    // Check auth state on route change
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    console.log('🔑 App - Auth state check:', {
+      pathname: location.pathname,
+      hasToken: !!token,
+      hasUser: !!user,
+      userData: user ? JSON.parse(user) : null
+    });
+  }, [location.pathname]);
+
+  return (
+    <>
+      <div className="App">
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          {/* Auth Routes - No Global Navigation */}
+          <Route path="/login" element={
+            <GlobalLayout>
+              <Login />
+            </GlobalLayout>
+          } />
+          <Route path="/register" element={
+            <GlobalLayout>
+              <Register />
+            </GlobalLayout>
+          } />
+          
+          {/* Protected Routes - With Global Navigation */}
           <Route 
             path="/dashboard" 
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <GlobalLayout>
+                  <Dashboard />
+                </GlobalLayout>
               </ProtectedRoute>
             } 
           />
@@ -34,7 +78,9 @@ function App() {
             path="/profile" 
             element={
               <ProtectedRoute>
-                <Profile />
+                <GlobalLayout>
+                  <Profile />
+                </GlobalLayout>
               </ProtectedRoute>
             } 
           />
@@ -42,39 +88,29 @@ function App() {
             path="/reports" 
             element={
               <ProtectedRoute>
-                <MyReports />
+                <GlobalLayout>
+                  <ManageReports />
+                </GlobalLayout>
               </ProtectedRoute>
             } 
           />
-          <Route 
+          {/* <Route 
             path="/reports/:id" 
             element={
               <ProtectedRoute>
-                <ReportDetails />
+                <GlobalLayout>
+                  <ReportDetails />
+                </GlobalLayout>
               </ProtectedRoute>
             } 
-          />
+          /> */}
           <Route 
             path="/report-lost" 
             element={
               <ProtectedRoute>
-                <ReportLost />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/lost" 
-            element={
-              <ProtectedRoute>
-                <LostFeed />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/lost/:id" 
-            element={
-              <ProtectedRoute>
-                <ReportDetails />
+                <GlobalLayout>
+                  <ReportItem />
+                </GlobalLayout>
               </ProtectedRoute>
             } 
           />
@@ -82,7 +118,29 @@ function App() {
             path="/found/report" 
             element={
               <ProtectedRoute>
-                <ReportFound />
+                <GlobalLayout>
+                  <ReportItem />
+                </GlobalLayout>
+              </ProtectedRoute>
+            } 
+          />
+          {/* <Route 
+            path="/lost" 
+            element={
+              <ProtectedRoute>
+                <GlobalLayout>
+                  <LostFeed />
+                </GlobalLayout>
+              </ProtectedRoute>
+            } 
+          /> */}
+          <Route 
+            path="/lost/:id" 
+            element={
+              <ProtectedRoute>
+                <GlobalLayout>
+                  <LostItemDetails />
+                </GlobalLayout>
               </ProtectedRoute>
             } 
           />
@@ -90,7 +148,9 @@ function App() {
             path="/found" 
             element={
               <ProtectedRoute>
-                <FoundItems />
+                <GlobalLayout>
+                  <FoundItems />
+                </GlobalLayout>
               </ProtectedRoute>
             } 
           />
@@ -98,31 +158,45 @@ function App() {
             path="/found/:id" 
             element={
               <ProtectedRoute>
-                <FoundItemDetails />
+                <GlobalLayout>
+                  <FoundItemDetails />
+                </GlobalLayout>
               </ProtectedRoute>
             } 
           />
-          <Route 
+          {/* <Route 
             path="/my-claims" 
             element={
               <ProtectedRoute>
-                <MyClaims />
+                <GlobalLayout>
+                  <MyClaims />
+                </GlobalLayout>
               </ProtectedRoute>
             } 
-          />
+          /> */}
           <Route 
             path="/admin" 
             element={
               <ProtectedRoute>
-                <AdminDashboard />
+                <GlobalLayout>
+                  <AdminRoom />
+                </GlobalLayout>
               </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/unauthorized" 
+            element={
+              <GlobalLayout>
+                <Unauthorized />
+              </GlobalLayout>
             } 
           />
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>
-    </Router>
+    </>
   );
 }
 

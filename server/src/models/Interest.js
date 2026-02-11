@@ -24,7 +24,23 @@ const interestSchema = new mongoose.Schema({
   pickupInstructions: {
     type: String,
     trim: true
-  }
+  },
+  replies: [{
+    message: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    replyBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Refined Reports Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4A6CF7",
+                        "background-light": "#FAFAFA",
+                        "peach": "#FFD8B1",
+                        "mint": "#D1F2EB",
+                        "lavender": "#E8D5F2",
+                        "navy": "#0d101c",
+                        "pastel-green": "#A8D5BA",
+                        "pastel-amber": "#FFD8A8",
+                    },
+                    fontFamily: {
+                        "sans": ["Quicksand", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .mesh-gradient {
+                background-color: #FAFAFA;
+                background-image: 
+                    radial-gradient(at 10% 20%, rgba(255, 216, 177, 0.4) 0px, transparent 50%),
+                    radial-gradient(at 90% 10%, rgba(209, 242, 235, 0.4) 0px, transparent 50%),
+                    radial-gradient(at 50% 90%, rgba(232, 213, 242, 0.4) 0px, transparent 50%),
+                    radial-gradient(at 80% 80%, rgba(255, 216, 177, 0.3) 0px, transparent 50%);
+            }
+            .glass-container {
+                background: rgba(255, 255, 255, 0.4);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.6);
+                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            }
+            .glass-stat {
+                background: rgba(255, 255, 255, 0.6);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.4);
+            }
+        }
+    </style>
+</head>
+<body class="font-sans bg-background-light min-h-screen mesh-gradient flex items-center justify-center py-12 px-4">
+<div class="glass-container w-full max-w-[1140px] rounded-[24px] p-8 md:p-12">
+<header class="text-center mb-10">
+<h1 class="text-navy text-4xl font-bold tracking-tight mb-2">My Reports Hub</h1>
+<p class="text-slate-500 text-lg">Manage and track your personal lost and found submissions in one place.</p>
+</header>
+<div class="flex flex-col md:flex-row items-center gap-6 mb-10 h-auto md:h-[48px]">
+<div class="relative w-full md:flex-[5] h-[48px]">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full h-full pl-11 pr-4 bg-white/60 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-primary rounded-[16px] text-sm transition-all placeholder:text-slate-400" placeholder="Search your reports..." type="text"/>
+</div>
+<div class="w-full md:flex-[3] h-[48px] bg-white/60 p-1 rounded-[16px] ring-1 ring-slate-200 flex items-center">
+<button class="flex-1 h-full rounded-[12px] bg-primary text-white text-sm font-bold flex items-center justify-center transition-all shadow-sm">
+                Lost Items
+            </button>
+<button class="flex-1 h-full rounded-[12px] text-slate-500 hover:text-navy text-sm font-semibold flex items-center justify-center transition-all hover:bg-white/40">
+                Found Items
+            </button>
+</div>
+<button class="w-full md:flex-[2] h-[48px] bg-primary hover:bg-primary/90 text-white rounded-[16px] font-bold text-sm shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 whitespace-nowrap px-6">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+            New Lost Report
+        </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<div class="glass-stat p-6 rounded-[24px] flex flex-col items-center justify-center gap-3 text-center">
+<div class="bg-primary/10 p-3 rounded-[16px] text-primary flex items-center justify-center">
+<span class="material-symbols-outlined">assignment</span>
+</div>
+<div>
+<p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Total Reports</p>
+<p class="text-navy text-2xl font-bold">12</p>
+</div>
+</div>
+<div class="glass-stat p-6 rounded-[24px] flex flex-col items-center justify-center gap-3 text-center">
+<div class="bg-pastel-green/40 p-3 rounded-[16px] text-emerald-700 flex items-center justify-center">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div>
+<p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Resolved</p>
+<p class="text-navy text-2xl font-bold">5</p>
+</div>
+</div>
+<div class="glass-stat p-6 rounded-[24px] flex flex-col items-center justify-center gap-3 text-center">
+<div class="bg-pastel-amber/40 p-3 rounded-[16px] text-orange-700 flex items-center justify-center">
+<span class="material-symbols-outlined">manage_search</span>
+</div>
+<div>
+<p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Searching</p>
+<p class="text-navy text-2xl font-bold">7</p>
+</div>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-center border-separate border-spacing-y-4">
+<thead>
+<tr class="text-navy">
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider">Item Name</th>
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider">Category</th>
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider">Date Reported</th>
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider">Location</th>
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="text-slate-600">
+<tr class="bg-white/40 hover:bg-white/60 transition-colors group">
+<td class="px-6 py-5 rounded-l-[24px] font-bold text-navy align-middle">Silver MacBook Pro</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-slate-100/80 text-slate-600 rounded-[12px] text-xs font-semibold">Electronics</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">Oct 24, 2023</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-4 py-1.5 bg-pastel-amber text-orange-900 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">search</span>
+                                Searching
+                            </span>
+</div>
+</td>
+<td class="px-6 py-5 italic text-sm align-middle">Library, 2nd Floor</td>
+<td class="px-6 py-5 rounded-r-[24px] align-middle">
+<div class="flex justify-center items-center gap-3">
+<button class="w-9 h-9 flex items-center justify-center bg-primary text-white hover:bg-primary/90 rounded-full transition-all shadow-sm" title="View"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+<button class="w-9 h-9 flex items-center justify-center bg-primary text-white hover:bg-primary/90 rounded-full transition-all shadow-sm" title="Edit"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+<button class="w-9 h-9 flex items-center justify-center bg-primary text-white hover:bg-red-500 rounded-full transition-all shadow-sm" title="Delete"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+</div>
+</td>
+</tr>
+<tr class="bg-white/40 hover:bg-white/60 transition-colors group">
+<td class="px-6 py-5 rounded-l-[24px] font-bold text-navy align-middle">Leather Wallet</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-slate-100/80 text-slate-600 rounded-[12px] text-xs font-semibold">Personal</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">Oct 22, 2023</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-4 py-1.5 bg-pastel-green text-emerald-900 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                Resolved
+                            </span>
+</div>
+</td>
+<td class="px-6 py-5 italic text-sm align-middle">Student Union</td>
+<td class="px-6 py-5 rounded-r-[24px] align-middle">
+<div class="flex justify-center items-center gap-3">
+<button class="w-9 h-9 flex items-center justify-center bg-primary text-white hover:bg-primary/90 rounded-full transition-all shadow-sm"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+<button class="w-9 h-9 flex items-center justify-center bg-primary text-white hover:bg-primary/90 rounded-full transition-all shadow-sm"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+<button class="w-9 h-9 flex items-center justify-center bg-primary text-white hover:bg-red-500 rounded-full transition-all shadow-sm"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+</div>
+</td>
+</tr>
+<tr class="bg-white/40 hover:bg-white/60 transition-colors group">
+<td class="px-6 py-5 rounded-l-[24px] font-bold text-navy align-middle">Blue HydroFlask</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-slate-100/80 text-slate-600 rounded-[12px] text-xs font-semibold">Kitchenware</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">Oct 20, 2023</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-4 py-1.5 bg-pastel-amber text-orange-900 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">search</span>
+                                Searching
+                            </span>
+</div>
+</td>
+<td class="px-6 py-5 italic text-sm align-middle">Science Lab 304</td>
+<td class="px-6 py-5 rounded-r-[24px] align-middle">
+<div class="flex justify-center items-center gap-3">
+<button class="w-9 h-9 flex items-center justify-center bg-primary text-white hover:bg-primary/90 rounded-full transition-all shadow-sm"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+<button class="w-9 h-9 flex items-center justify-center bg-primary text-white hover:bg-primary/90 rounded-full transition-all shadow-sm"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+<button class="w-9 h-9 flex items-center justify-center bg-primary text-white hover:bg-red-500 rounded-full transition-all shadow-sm"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-10 flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-white/40">
+<p class="text-slate-500 text-sm font-medium">Showing <span class="text-navy font-bold">1 to 3</span> of <span class="text-navy font-bold">12</span> reports</p>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 bg-white/40 text-navy font-bold text-sm rounded-[16px] hover:bg-white/60 transition-all border border-white/60 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                Prev
+            </button>
+<div class="flex gap-1.5">
+<a class="w-10 h-10 flex items-center justify-center rounded-[16px] bg-primary text-white font-bold text-sm shadow-md" href="#">1</a>
+<a class="w-10 h-10 flex items-center justify-center rounded-[16px] bg-white/40 text-navy font-bold text-sm hover:bg-white/60 transition-all border border-white/60" href="#">2</a>
+<a class="w-10 h-10 flex items-center justify-center rounded-[16px] bg-white/40 text-navy font-bold text-sm hover:bg-white/60 transition-all border border-white/60" href="#">3</a>
+</div>
+<button class="px-4 py-2 bg-white/40 text-navy font-bold text-sm rounded-[16px] hover:bg-white/60 transition-all border border-white/60 flex items-center gap-2">
+                Next
+                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>

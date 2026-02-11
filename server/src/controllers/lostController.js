@@ -28,11 +28,22 @@ const createLostItem = async (req, res, next) => {
       notifyRequested
     } = req.body;
 
-    // Validation
-    if (!itemName || !category || !dateLost || !locationLost || !description) {
+    // Validation - check all required fields
+    const missingFields = [];
+    
+    if (!itemName) missingFields.push('Item Name');
+    if (!category) missingFields.push('Category');
+    if (!dateLost) missingFields.push('Date Lost');
+    if (!locationLost) missingFields.push('Location Lost');
+    if (!description) missingFields.push('Description');
+    if (!contactPhone) missingFields.push('Contact Phone');
+    if (!visibility) missingFields.push('Visibility');
+
+    if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields'
+        message: `Please complete the following required fields: ${missingFields.join(', ')}`,
+        missingFields: missingFields
       });
     }
 
@@ -43,12 +54,12 @@ const createLostItem = async (req, res, next) => {
       });
     }
 
-    // Handle image URL if image was uploaded
+    // Handle image upload and processing
     let imageUrl = null;
     if (req.file) {
-      // For now, we'll skip image storage in serverless
-      // In production, you'd upload to cloud storage like Cloudinary, AWS S3, etc.
-      imageUrl = 'image-uploaded'; // Placeholder
+      const { processImageUpload } = require('../utils/upload');
+      imageUrl = processImageUpload(req.file);
+      console.log('Image processed:', imageUrl ? 'Success' : 'Failed');
     }
 
     console.log('Creating LostItem...');
@@ -64,8 +75,10 @@ const createLostItem = async (req, res, next) => {
       uniqueMark,
       contactPhone,
       imageUrl,
-      visibility: visibility || 'CAMPUS',
-      notifyRequested: notifyRequested || false
+      visibility: visibility || 'PUBLIC',
+      notifyRequested: notifyRequested === 'true', // Convert string to boolean
+      publishStatus: 'PUBLISHED', // Auto-publish for immediate visibility
+      reviewStatus: 'APPROVED' // Auto-approve for immediate visibility
     });
     console.log('LostItem created:', lostItem._id);
 
@@ -96,6 +109,66 @@ const createLostItem = async (req, res, next) => {
       data: lostItem,
       message: 'Lost item reported successfully. ' + (notifResult.emailResult?.success ? 'Email confirmation sent.' : ''),
       notificationStatus: notifResult.emailResult
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all lost items with pagination and filters (public listing)
+// @route   GET /api/lost
+// @access  Private
+const getLostItems = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const search = req.query.search || '';
+    const category = req.query.category || '';
+    const location = req.query.location || '';
+
+    // Build query for public lost items
+    let query = {
+      publishStatus: 'PUBLISHED',
+      visibility: 'PUBLIC',
+      reviewStatus: 'APPROVED'
+    };
+
+    // Search by itemName or description
+    if (search) {
+      query.$or = [
+        { itemName: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Filter by category
+    if (category && category !== 'all') {
+      query.category = category;
+    }
+
+    // Filter by location
+    if (location) {
+      query.locationLost = { $regex: location, $options: 'i' };
+    }
+
+    const lostItems = await LostItem.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip((page - 1) * limit)
+      .select('-contactPhone -uniqueMark') // Don't expose sensitive details
+      .populate('userId', 'name');
+
+    const total = await LostItem.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      data: lostItems,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     next(error);
@@ -155,7 +228,7 @@ const getLostItem = async (req, res, next) => {
     
     const isOwner = lostItem.userId._id.toString() === req.user._id.toString();
     const isAdmin = req.user.role === 'ADMIN';
-    const isPublic = lostItem.visibility === 'CAMPUS' && lostItem.publishStatus === 'PUBLISHED';
+    const isPublic = lostItem.visibility === 'PUBLIC' && lostItem.publishStatus === 'PUBLISHED';
 
     if (!isOwner && !isAdmin && !isPublic) {
       return res.status(403).json({
@@ -304,6 +377,49 @@ const getMatches = async (req, res, next) => {
   }
 };
 
+// @desc    Update lost item report
+// @route   PATCH /api/lost/:id
+// @access  Private
+const updateLostItem = async (req, res, next) => {
+  try {
+    const { itemName, category, description, locationLost } = req.body;
+    
+    // Find the lost item
+    const lostItem = await LostItem.findById(req.params.id);
+    
+    if (!lostItem) {
+      return res.status(404).json({
+        success: false,
+        message: 'Lost item not found'
+      });
+    }
+
+    // Check if user is the owner or admin
+    if (lostItem.userId.toString() !== req.user._id.toString() && req.user.role !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this report'
+      });
+    }
+
+    // Update fields
+    if (itemName) lostItem.itemName = itemName;
+    if (category) lostItem.category = category;
+    if (description) lostItem.description = description;
+    if (locationLost) lostItem.locationLost = locationLost;
+
+    await lostItem.save();
+
+    res.status(200).json({
+      success: true,
+      data: lostItem,
+      message: 'Lost item updated successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Close lost item report
 // @route   PATCH /api/lost/:id/close
 // @access  Private
@@ -353,9 +469,11 @@ const closeLostItem = async (req, res, next) => {
 
 module.exports = {
   createLostItem,
+  getLostItems,
   getMyLostItems,
   getLostItem,
   getNearbyLostItems,
   getMatches,
+  updateLostItem,
   closeLostItem
 };

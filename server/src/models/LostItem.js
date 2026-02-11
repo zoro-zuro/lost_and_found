@@ -47,15 +47,15 @@ const lostItemSchema = new mongoose.Schema({
     trim: true
   },
   imageUrl: {
-    type: String,
-    trim: true
+    type: mongoose.Schema.Types.Mixed, // Can store string or object
+    default: null
   },
   
   // Visibility and moderation fields
   visibility: {
     type: String,
-    enum: ['ADMIN_ONLY', 'CAMPUS'],
-    default: 'CAMPUS'
+    enum: ['ADMIN_ONLY', 'PUBLIC'],
+    default: 'PUBLIC'
   },
   notifyRequested: {
     type: Boolean,

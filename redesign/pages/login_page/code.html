@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Animated Login V2</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Outfit:wght@400;600;800&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4A6CF7",
+                        "background-light": "#FDFCFB",
+                        "background-dark": "#0F172A",
+                        peach: "#FFD8B1",
+                        mint: "#D1F2EB",
+                        lavender: "#E8D5F2",
+                        "royal-blue": "#4A6CF7",
+                        "blue-gray": "#64748B",
+                        navy: "#1E293B"
+                    },
+                    fontFamily: {
+                        display: ["Outfit", "sans-serif"],
+                        sans: ["Quicksand", "sans-serif"],
+                    },
+                    animation: {
+                        'spin-slow': 'spin 20s linear infinite',
+                        'spin-slower': 'spin 30s linear infinite reverse',
+                        'wave-flow': 'wave 6s ease-in-out infinite',
+                        'blob': 'blob 10s infinite',
+                    },
+                    keyframes: {
+                        wave: {
+                            '0%, 100%': { transform: 'scaleY(1.0) translateX(0)' },
+                            '50%': { transform: 'scaleY(1.02) translateX(-8px)' },
+                        },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .mesh-bg-full {
+                background-color: #FDFCFB;
+                background-image: 
+                    radial-gradient(at 0% 0%, #FFD8B1 0px, transparent 40%),
+                    radial-gradient(at 50% 0%, #D1F2EB 0px, transparent 50%),
+                    radial-gradient(at 100% 0%, #E8D5F2 0px, transparent 40%),
+                    radial-gradient(at 100% 100%, #FFD8B1 0px, transparent 40%),
+                    radial-gradient(at 50% 100%, #D1F2EB 0px, transparent 50%),
+                    radial-gradient(at 0% 100%, #E8D5F2 0px, transparent 40%);
+            }
+            .dark .mesh-bg-full {
+                background-color: #0F172A;
+                background-image: 
+                    radial-gradient(at 0% 0%, rgba(255, 216, 177, 0.15) 0px, transparent 40%),
+                    radial-gradient(at 100% 100%, rgba(232, 213, 242, 0.15) 0px, transparent 40%);
+            }
+            .glass-panel {
+                background: rgba(255, 255, 255, 0.5);
+                backdrop-filter: blur(25px);
+                -webkit-backdrop-filter: blur(25px);
+            }
+            .dark .glass-panel {
+                background: rgba(15, 23, 42, 0.6);
+            }
+            .glass-bubble {
+                background: rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(8px);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+            }
+            .input-glow:focus {
+                box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.1), 0 0 25px rgba(74, 108, 247, 0.25);
+            }
+            .text-shadow-sm {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+        }
+    </style>
+</head>
+<body class="mesh-bg-full font-sans text-slate-900 dark:text-white min-h-screen flex items-center justify-center p-4 lg:p-6 transition-colors duration-300">
+<div class="w-full max-w-[1140px] h-auto lg:h-[800px] flex flex-col lg:flex-row shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] rounded-[40px] overflow-hidden relative z-10 border border-white/40 dark:border-slate-700/50 bg-white/10 dark:bg-slate-900/20 backdrop-blur-sm">
+<div class="relative w-full lg:w-[45%] flex flex-col justify-center p-8 md:p-12 xl:p-16 z-20">
+<div class="absolute inset-0 glass-panel z-0"></div>
+<div class="hidden lg:block absolute top-0 -right-[100px] w-[101px] h-full z-10 pointer-events-none overflow-hidden">
+<svg class="h-full w-full animate-wave-slow origin-left" preserveAspectRatio="none" viewBox="0 0 100 1000">
+<path class="fill-[rgba(255,255,255,0.5)] dark:fill-[rgba(15,23,42,0.6)] transition-colors duration-300" d="M0,0 C50,150 120,350 60,500 C0,650 100,850 0,1000 L0,0 Z"></path>
+</svg>
+</div>
+<div class="relative z-20 w-full max-w-md mx-auto">
+<div class="flex flex-col items-center mb-8 text-center">
+<div class="mb-6 p-4 rounded-2xl border border-white/40 bg-white/40 dark:bg-slate-800/50 shadow-lg shadow-primary/5">
+<span class="material-symbols-rounded text-4xl text-slate-800 dark:text-slate-200">lock_open</span>
+</div>
+<h2 class="text-3xl font-display font-black tracking-tight text-slate-900 dark:text-white uppercase">Portal Access</h2>
+<p class="text-slate-600 dark:text-slate-400 font-medium mt-1">AMC Institutional Sign-in</p>
+</div>
+<div class="flex bg-white/30 dark:bg-slate-900/30 p-1.5 rounded-2xl mb-8 border border-white/20 dark:border-slate-700/50">
+<button class="flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white">
+                        STUDENT
+                    </button>
+<button class="flex-1 py-3 px-4 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-all">
+                        STAFF
+                    </button>
+</div>
+<form class="space-y-6">
+<div>
+<label class="block text-sm font-bold text-slate-800 dark:text-slate-300 mb-2 ml-1" for="email">Institutional Email *</label>
+<div class="relative group">
+<input class="w-full bg-white/60 dark:bg-slate-900/50 border border-white/40 dark:border-slate-700 rounded-xl px-5 py-4 text-slate-900 dark:text-white focus:border-primary/50 transition-all outline-none placeholder:text-slate-500 input-glow" id="email" placeholder="student@college.edu" required="" type="email"/>
+<span class="absolute right-5 top-1/2 -translate-y-1/2 material-symbols-rounded text-slate-500 group-focus-within:text-primary transition-colors">alternate_email</span>
+</div>
+</div>
+<div>
+<label class="block text-sm font-bold text-slate-800 dark:text-slate-300 mb-2 ml-1" for="password">Secure Password *</label>
+<div class="relative group">
+<input class="w-full bg-white/60 dark:bg-slate-900/50 border border-white/40 dark:border-slate-700 rounded-xl px-5 py-4 text-slate-900 dark:text-white focus:border-primary/50 transition-all outline-none placeholder:text-slate-500 input-glow" id="password" placeholder="••••••••••" required="" type="password"/>
+<span class="absolute right-5 top-1/2 -translate-y-1/2 material-symbols-rounded text-slate-500 hover:text-primary cursor-pointer transition-colors">visibility_off</span>
+</div>
+</div>
+<button class="w-full bg-royal-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/30 transition-all transform active:scale-[0.98] mt-4 flex items-center justify-center gap-3 text-lg" type="submit">
+                        Enter Portal
+                        <span class="material-symbols-rounded">arrow_forward</span>
+</button>
+</form>
+<div class="mt-8 pt-6 border-t border-white/20 dark:border-slate-700/50 text-center">
+<p class="text-slate-700 dark:text-slate-400 font-medium text-sm">
+                        New Member? 
+                        <a class="text-primary font-bold ml-1 hover:underline underline-offset-4 uppercase tracking-wide" href="#">Register Identity</a>
+</p>
+</div>
+</div>
+</div>
+<div class="hidden lg:flex flex-1 relative items-center justify-center p-12 overflow-hidden">
+<div class="absolute top-20 right-20 w-40 h-40 rounded-full glass-bubble animate-spin-slow"></div>
+<div class="absolute bottom-32 left-20 w-56 h-56 rounded-full glass-bubble animate-spin-slower"></div>
+<div class="absolute top-1/2 right-10 w-20 h-20 rounded-full glass-bubble opacity-60 animate-blob"></div>
+<svg class="absolute inset-0 w-full h-full opacity-20 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
+<path d="M-10,30 Q20,10 50,30 T110,30" fill="none" stroke="#4A6CF7" stroke-width="0.2"></path>
+<path d="M-10,70 Q30,90 60,70 T110,70" fill="none" stroke="#E8D5F2" stroke-width="0.3"></path>
+</svg>
+<div class="relative z-10 flex flex-col items-center text-center max-w-lg">
+<div class="relative w-[450px] h-[400px] flex items-center justify-center mb-6">
+<svg class="w-80 h-80 drop-shadow-2xl z-10" fill="none" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<path d="M45,70 C45,50 60,40 100,40 C140,40 155,50 155,70 L155,160 C155,175 140,185 100,185 C60,185 45,175 45,160 Z" fill="#D1F2EB" stroke="#1E293B" stroke-linejoin="round" stroke-width="3"></path>
+<path d="M60,40 C60,25 75,20 100,20 C125,20 140,25 140,40" stroke="#1E293B" stroke-linecap="round" stroke-width="3"></path>
+<path d="M45,90 H155" stroke="#1E293B" stroke-dasharray="4 4" stroke-width="2"></path>
+<rect fill="#FFD8B1" height="40" rx="8" stroke="#1E293B" stroke-width="2.5" width="50" x="75" y="110"></rect>
+<path d="M90,130 H110" stroke="#1E293B" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute top-10 left-10 transform -rotate-12 animate-blob">
+<svg fill="none" height="40" viewBox="0 0 40 40" width="40">
+<circle cx="15" cy="15" fill="#E8D5F2" r="8" stroke="#1E293B" stroke-width="2"></circle>
+<path d="M22,22 L35,35 M30,30 L35,25 M25,35 L30,30" stroke="#1E293B" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="absolute top-0 right-10 transform rotate-12 animate-[bounce_4s_infinite]">
+<svg fill="none" height="30" viewBox="0 0 60 30" width="60">
+<circle cx="15" cy="15" fill="#D1F2EB" r="10" stroke="#1E293B" stroke-width="2"></circle>
+<circle cx="45" cy="15" fill="#D1F2EB" r="10" stroke="#1E293B" stroke-width="2"></circle>
+<path d="M25,15 C30,10 30,10 35,15" stroke="#1E293B" stroke-width="2"></path>
+</svg>
+</div>
+<div class="absolute bottom-10 right-0 transform rotate-45 animate-pulse">
+<svg fill="none" height="50" viewBox="0 0 30 50" width="30">
+<rect fill="#FFD8B1" height="46" rx="4" stroke="#1E293B" stroke-width="2" width="26" x="2" y="2"></rect>
+<rect fill="#1E293B" height="2" rx="1" width="6" x="12" y="42"></rect>
+</svg>
+</div>
+</div>
+<div class="mt-2">
+<h1 class="text-5xl font-sans font-bold text-navy tracking-tight text-shadow-sm mb-4">
+                        College Lost &amp; Found
+                    </h1>
+<p class="text-xl text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                        A creative hub to reconnect with your essentials and keep our campus community whole.
+                    </p>
+</div>
+</div>
+</div>
+</div>
+<button class="fixed bottom-6 right-6 p-4 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-md shadow-xl border border-white/40 dark:border-slate-700 text-slate-800 dark:text-white hover:scale-110 transition-transform z-50" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-rounded dark:hidden">dark_mode</span>
+<span class="material-symbols-rounded hidden dark:block">light_mode</span>
+</button>
+
+</body></html>

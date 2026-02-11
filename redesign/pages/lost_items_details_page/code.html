@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Warm Lost Item Details View</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Quicksand:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4A6CF7",
+                        "navy-header": "#1A2B56",
+                        "background-light": "#FAFAFA",
+                    },
+                    fontFamily: {
+                        "display": ["Quicksand", "sans-serif"],
+                        "accent": ["Quicksand", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "2rem", // 32px rounded corners
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .mesh-gradient-bg {
+            background-color: #FAFAFA;
+            background-image: 
+                radial-gradient(at 0% 0%, #FFD8B1 0px, transparent 50%),
+                radial-gradient(at 100% 0%, #D1F2EB 0px, transparent 50%),
+                radial-gradient(at 100% 100%, #E8D5F2 0px, transparent 50%),
+                radial-gradient(at 0% 100%, #D1F2EB 0px, transparent 50%);
+            background-blend-mode: multiply;
+            opacity: 0.9;
+        }body {
+            background: #FAFAFA;
+            background-image: 
+                radial-gradient(at 0% 0%, #FFD8B1 0px, transparent 35%),
+                radial-gradient(at 100% 0%, #D1F2EB 0px, transparent 35%),
+                radial-gradient(at 100% 100%, #E8D5F2 0px, transparent 35%),
+                radial-gradient(at 0% 100%, #D1F2EB 0px, transparent 35%);
+        }
+        .glass-container {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 1);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="font-display min-h-screen flex items-center justify-center p-8">
+<main class="glass-container max-w-[1140px] w-full rounded-xl overflow-hidden shadow-2xl flex flex-col md:flex-row p-8 md:p-12 gap-12">
+<div class="flex-1">
+<div class="flex flex-wrap gap-2 mb-6">
+<a class="text-primary text-sm font-semibold leading-normal flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+                    Lost &amp; Found
+                </a>
+<span class="text-gray-400 text-sm font-medium leading-normal">/</span>
+<span class="text-navy-header text-sm font-semibold leading-normal">Silver MacBook Pro</span>
+</div>
+<div class="relative w-full aspect-[4/5] bg-center bg-no-repeat bg-cover rounded-lg shadow-lg overflow-hidden" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB8qmztqdyTuVkiTjO-T_aEtoqJmOq6vz06N0EKqgZakj0iN4GXpeyPPH6xuimwFh7rBFmDPKlySqJRvdMgTWJkdJEGFsoe9hC-2ab5ypBxyX2Jv5Yv5_JyKfct9yiMf6sKZkcD4Sz-uyed1dMAxxJTm-ckKro33eVRNdeTA0zHwUeed6JaYUUYNtsA7OJ3VYBVp9S9RwFYvAAaKNBfKyWpZ9vht_O8sFuylQELNNjT8HYCz7jhtkDKglEL0yiWjfPWWymdPM4ntAw");'>
+<div class="p-4">
+<span class="bg-[#FCD34D] text-[#92400E] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
+                        SEARCHING
+                    </span>
+</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col">
+<div class="mb-8">
+<h1 class="text-navy-header text-5xl font-bold leading-tight tracking-tight mb-2 font-accent">
+                    Silver MacBook Pro
+                </h1>
+<p class="text-primary text-lg font-medium flex items-center gap-2">
+<span class="material-symbols-outlined">location_on</span>
+                    Main Library - 3rd Floor
+                </p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+<div class="flex items-start gap-4 p-4 rounded-lg bg-white/30 border border-white/40">
+<div class="text-navy-header bg-white/50 p-3 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">category</span>
+</div>
+<div>
+<h3 class="text-navy-header text-sm font-bold uppercase tracking-wider">Category</h3>
+<p class="text-gray-600 text-base">Electronics</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-4 rounded-lg bg-white/30 border border-white/40">
+<div class="text-navy-header bg-white/50 p-3 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">calendar_today</span>
+</div>
+<div>
+<h3 class="text-navy-header text-sm font-bold uppercase tracking-wider">Date Lost</h3>
+<p class="text-gray-600 text-base">October 24, 2023</p>
+</div>
+</div>
+</div>
+<div class="mb-10 flex-grow">
+<h3 class="text-navy-header text-xl font-bold mb-3">Item Description</h3>
+<div class="h-px w-16 bg-primary/30 mb-4"></div>
+<p class="text-gray-600 text-lg leading-relaxed">
+                    Lost my silver MacBook Pro with a clear case. It has a distinctive sticker of a rocket ship on the top right corner. Very important for my finals.
+                </p>
+</div>
+<div class="flex flex-col gap-4 mt-auto">
+<button class="bg-primary hover:bg-[#3d5cd9] text-white text-xl font-bold py-5 px-8 rounded-full shadow-[0_10px_30px_-10px_rgba(74,108,247,0.5)] transition-all flex items-center justify-center gap-3 w-full">
+<span class="material-symbols-outlined">favorite</span>
+                    I Found This Item
+                </button>
+<button class="text-navy-header hover:bg-white/40 py-3 px-8 rounded-full font-semibold transition-all flex items-center justify-center gap-2 border border-transparent hover:border-white/60">
+<span class="material-symbols-outlined text-xl">person</span>
+                    Have info? Contact the Owner
+                </button>
+</div>
+</div>
+</main>
+<div class="fixed bottom-6 text-navy-header/50 text-sm font-medium">
+        Campus Reclaim • University Administration Lost &amp; Found Portal
+    </div>
+
+</body></html>

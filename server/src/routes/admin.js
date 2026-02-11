@@ -3,6 +3,8 @@ const router = express.Router();
 const { 
   getAdminStats, 
   getAllLostItems, 
+  getAllReports,
+  listUsers,
   updateLostItemStatus,
   createFoundItem,
   getAllClaims,
@@ -17,6 +19,12 @@ router.use(checkRole(['ADMIN', 'STAFF']));
 
 // Dashboard Stats
 router.get('/stats', getAdminStats);
+
+// Reports Management (Combined)
+router.get('/reports', getAllReports);
+
+// User Management (Listing for filters)
+router.get('/users', listUsers);
 
 // Lost Items Management
 router.get('/lost', getAllLostItems);

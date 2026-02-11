@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Refined Admin Reports Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4A6CF7",
+                        "background-light": "#FAFAFA",
+                        "peach": "#FFD8B1",
+                        "mint": "#D1F2EB",
+                        "lavender": "#E8D5F2",
+                        "navy": "#0d101c",
+                        "pastel-green": "#A8D5BA",
+                        "pastel-amber": "#FFD8A8",
+                        "pastel-gray": "#E2E8F0",
+                    },
+                    fontFamily: {
+                        "sans": ["Quicksand", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .mesh-gradient {
+                background-color: #FAFAFA;
+                background-image: 
+                    radial-gradient(at 10% 20%, rgba(255, 216, 177, 0.4) 0px, transparent 50%),
+                    radial-gradient(at 90% 10%, rgba(209, 242, 235, 0.4) 0px, transparent 50%),
+                    radial-gradient(at 50% 90%, rgba(232, 213, 242, 0.4) 0px, transparent 50%),
+                    radial-gradient(at 80% 80%, rgba(255, 216, 177, 0.3) 0px, transparent 50%);
+            }
+            .glass-container {
+                background: rgba(255, 255, 255, 0.4);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.6);
+                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            }
+            .glass-stat {
+                background: rgba(255, 255, 255, 0.6);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.4);
+            }
+        }
+    </style>
+</head>
+<body class="font-sans bg-background-light min-h-screen mesh-gradient flex items-center justify-center py-12 px-4">
+<div class="glass-container w-full max-w-[1140px] rounded-[24px] p-8 md:p-12">
+<header class="text-center mb-10">
+<h1 class="text-navy text-4xl font-bold tracking-tight mb-2">Admin Lost Reports Management</h1>
+<p class="text-slate-500 text-lg">Managing student and staff lost item reports across campus departments.</p>
+</header>
+<div class="flex flex-col md:flex-row items-center gap-6 mb-10 h-auto md:h-[48px]">
+<div class="relative w-full md:flex-[4] h-[48px]">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full h-full pl-11 pr-4 bg-white/60 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-primary rounded-[16px] text-sm transition-all placeholder:text-slate-400" placeholder="Search by student ID or item..." type="text"/>
+</div>
+<div class="w-full md:flex-[3] h-[48px] bg-white/60 p-1 rounded-[16px] ring-1 ring-slate-200 flex items-center">
+<button class="flex-1 h-full rounded-[12px] bg-primary text-white text-sm font-bold flex items-center justify-center transition-all shadow-sm">
+                Admin View
+            </button>
+<button class="flex-1 h-full rounded-[12px] text-slate-500 hover:text-navy text-sm font-semibold flex items-center justify-center transition-all hover:bg-white/40">
+                Public View
+            </button>
+</div>
+<div class="relative w-full md:flex-[3] h-[48px]">
+<select class="w-full h-full pl-4 pr-10 bg-white/60 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-primary rounded-[16px] text-sm appearance-none cursor-pointer text-slate-600 font-semibold transition-all">
+<option value="">Filter by Location</option>
+<option value="main">Main Library</option>
+<option value="union">Student Union</option>
+<option value="gym">Sports Center</option>
+<option value="hall">Great Hall</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<div class="glass-stat px-6 py-4 rounded-[20px] flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<div class="bg-primary/10 w-8 h-8 rounded-[10px] text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">pending_actions</span>
+</div>
+<p class="text-slate-500 text-[11px] font-bold uppercase tracking-wider mt-1">Open Reports</p>
+</div>
+<p class="text-navy text-3xl font-bold">42</p>
+</div>
+<div class="glass-stat px-6 py-4 rounded-[20px] flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<div class="bg-pastel-green/40 w-8 h-8 rounded-[10px] text-emerald-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">task_alt</span>
+</div>
+<p class="text-slate-500 text-[11px] font-bold uppercase tracking-wider mt-1">Total Handled</p>
+</div>
+<p class="text-navy text-3xl font-bold">1,284</p>
+</div>
+<div class="glass-stat px-6 py-4 rounded-[20px] flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<div class="bg-pastel-amber/40 w-8 h-8 rounded-[10px] text-orange-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">notifications_active</span>
+</div>
+<p class="text-slate-500 text-[11px] font-bold uppercase tracking-wider mt-1">Recent Claims</p>
+</div>
+<p class="text-navy text-3xl font-bold">15</p>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-center border-separate border-spacing-y-4">
+<thead>
+<tr class="text-navy">
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider w-1/4">Report ID &amp; Submitter</th>
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider w-1/4">Lost Item Details</th>
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider w-1/6">Status</th>
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider w-1/6">Last Seen</th>
+<th class="px-6 py-4 font-bold text-sm uppercase tracking-wider w-1/6">Manage</th>
+</tr>
+</thead>
+<tbody class="text-slate-600">
+<tr class="bg-white/40 hover:bg-white/60 transition-colors group">
+<td class="px-6 py-5 rounded-l-[24px] align-middle">
+<div class="flex flex-col items-center">
+<span class="font-bold text-navy">23BIT001</span>
+<span class="text-xs text-slate-500">Student ID</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex flex-col items-center">
+<span class="font-bold text-navy">Silver MacBook Pro</span>
+<span class="text-xs px-2 py-0.5 bg-slate-100 rounded-md">Electronics</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-4 py-1.5 bg-pastel-amber text-orange-900 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">radio_button_checked</span>
+                                Open
+                            </span>
+</div>
+</td>
+<td class="px-6 py-5 italic text-sm align-middle">Library Floor 2</td>
+<td class="px-6 py-5 rounded-r-[24px] align-middle">
+<div class="flex justify-center items-center gap-4 whitespace-nowrap">
+<button class="text-primary font-bold text-sm hover:underline">Details</button>
+<button class="text-slate-400 hover:text-red-500 font-bold text-sm transition-colors">Close Case</button>
+</div>
+</td>
+</tr>
+<tr class="bg-white/40 hover:bg-white/60 transition-colors group">
+<td class="px-6 py-5 rounded-l-[24px] align-middle">
+<div class="flex flex-col items-center">
+<span class="font-bold text-navy">23ENG042</span>
+<span class="text-xs text-slate-500">Student ID</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex flex-col items-center">
+<span class="font-bold text-navy">Leather Wallet</span>
+<span class="text-xs px-2 py-0.5 bg-slate-100 rounded-md">Personal</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-4 py-1.5 bg-pastel-green text-emerald-900 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+                                Claimed
+                            </span>
+</div>
+</td>
+<td class="px-6 py-5 italic text-sm align-middle">Student Union</td>
+<td class="px-6 py-5 rounded-r-[24px] align-middle">
+<div class="flex justify-center items-center gap-4 whitespace-nowrap">
+<button class="text-primary font-bold text-sm hover:underline">Details</button>
+<button class="text-slate-400 hover:text-red-500 font-bold text-sm transition-colors">Close Case</button>
+</div>
+</td>
+</tr>
+<tr class="bg-white/40 hover:bg-white/60 transition-colors group">
+<td class="px-6 py-5 rounded-l-[24px] align-middle">
+<div class="flex flex-col items-center">
+<span class="font-bold text-navy">FAC-902</span>
+<span class="text-xs text-slate-500">Staff ID</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex flex-col items-center">
+<span class="font-bold text-navy">Blue HydroFlask</span>
+<span class="text-xs px-2 py-0.5 bg-slate-100 rounded-md">Kitchenware</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-4 py-1.5 bg-pastel-gray text-slate-600 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">cancel</span>
+                                Closed
+                            </span>
+</div>
+</td>
+<td class="px-6 py-5 italic text-sm align-middle">Science Lab B</td>
+<td class="px-6 py-5 rounded-r-[24px] align-middle">
+<div class="flex justify-center items-center gap-4 whitespace-nowrap">
+<button class="text-primary font-bold text-sm hover:underline">Details</button>
+<button class="text-slate-400 hover:text-red-500 font-bold text-sm transition-colors">Close Case</button>
+</div>
+</td>
+</tr>
+<tr class="bg-white/40 hover:bg-white/60 transition-colors group">
+<td class="px-6 py-5 rounded-l-[24px] align-middle">
+<div class="flex flex-col items-center">
+<span class="font-bold text-navy">23ART115</span>
+<span class="text-xs text-slate-500">Student ID</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex flex-col items-center">
+<span class="font-bold text-navy">RayBan Sunglasses</span>
+<span class="text-xs px-2 py-0.5 bg-slate-100 rounded-md">Accessories</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-4 py-1.5 bg-pastel-amber text-orange-900 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">radio_button_checked</span>
+                                Open
+                            </span>
+</div>
+</td>
+<td class="px-6 py-5 italic text-sm align-middle">Campus Cafeteria</td>
+<td class="px-6 py-5 rounded-r-[24px] align-middle">
+<div class="flex justify-center items-center gap-4 whitespace-nowrap">
+<button class="text-primary font-bold text-sm hover:underline">Details</button>
+<button class="text-slate-400 hover:text-red-500 font-bold text-sm transition-colors">Close Case</button>
+</div>
+</td>
+</tr>
+<tr class="bg-white/40 hover:bg-white/60 transition-colors group">
+<td class="px-6 py-5 rounded-l-[24px] align-middle">
+<div class="flex flex-col items-center">
+<span class="font-bold text-navy">23BUS088</span>
+<span class="text-xs text-slate-500">Student ID</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex flex-col items-center">
+<span class="font-bold text-navy">Car Key Fob</span>
+<span class="text-xs px-2 py-0.5 bg-slate-100 rounded-md">Automotive</span>
+</div>
+</td>
+<td class="px-6 py-5 align-middle">
+<div class="flex justify-center">
+<span class="px-4 py-1.5 bg-pastel-green text-emerald-900 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+                                Claimed
+                            </span>
+</div>
+</td>
+<td class="px-6 py-5 italic text-sm align-middle">North Parking</td>
+<td class="px-6 py-5 rounded-r-[24px] align-middle">
+<div class="flex justify-center items-center gap-4 whitespace-nowrap">
+<button class="text-primary font-bold text-sm hover:underline">Details</button>
+<button class="text-slate-400 hover:text-red-500 font-bold text-sm transition-colors">Close Case</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-10 flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-white/40">
+<p class="text-slate-500 text-sm font-medium">Showing <span class="text-navy font-bold">1 to 5</span> of <span class="text-navy font-bold">42</span> management records</p>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 bg-white/40 text-navy font-bold text-sm rounded-[16px] hover:bg-white/60 transition-all border border-white/60 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                Prev
+            </button>
+<div class="flex gap-1.5">
+<a class="w-10 h-10 flex items-center justify-center rounded-[16px] bg-primary text-white font-bold text-sm shadow-md" href="#">1</a>
+<a class="w-10 h-10 flex items-center justify-center rounded-[16px] bg-white/40 text-navy font-bold text-sm hover:bg-white/60 transition-all border border-white/60" href="#">2</a>
+<a class="w-10 h-10 flex items-center justify-center rounded-[16px] bg-white/40 text-navy font-bold text-sm hover:bg-white/60 transition-all border border-white/60" href="#">3</a>
+</div>
+<button class="px-4 py-2 bg-white/40 text-navy font-bold text-sm rounded-[16px] hover:bg-white/60 transition-all border border-white/60 flex items-center gap-2">
+                Next
+                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>

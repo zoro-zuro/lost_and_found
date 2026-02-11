@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a6cf7",
+                        "background-light": "#f5f6f8",
+                        "navy-dark": "#111218",
+                    },
+                    fontFamily: {
+                        "sans": ["Quicksand", "sans-serif"],
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Quicksand', sans-serif;
+        }
+        .mesh-gradient {
+            background-color: #f5f6f8;
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(255, 218, 185, 0.4) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, rgba(188, 246, 227, 0.4) 0px, transparent 50%),
+                radial-gradient(at 50% 90%, rgba(230, 210, 255, 0.4) 0px, transparent 50%),
+                radial-gradient(at 80% 80%, rgba(255, 218, 185, 0.3) 0px, transparent 50%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+        .wiggly-line {
+            mask-image: url("data:image/svg+xml,%3Csvg width='100' height='20' viewBox='0 0 100 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q 25 0 50 10 T 100 10' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+            mask-repeat: repeat-x;
+        }
+        input[type="radio"], input[type="checkbox"] {
+            @apply text-primary focus:ring-primary border-gray-300;
+        }
+    </style>
+</head>
+<body class="bg-background-light min-h-screen mesh-gradient flex items-center justify-center p-6 md:p-12 relative overflow-x-hidden">
+<div class="absolute top-20 -left-10 w-64 h-2 bg-primary/10 wiggly-line opacity-50 rotate-12 pointer-events-none"></div>
+<div class="absolute bottom-40 -right-10 w-80 h-2 bg-primary/10 wiggly-line opacity-50 -rotate-12 pointer-events-none"></div>
+<div class="layout-container flex h-full grow flex-col items-center">
+<div class="glass-card w-full max-w-[1140px] rounded-xl p-8 md:p-12 shadow-2xl transition-all duration-300">
+<div class="text-center mb-10">
+<h1 class="text-navy-dark text-[40px] font-bold leading-tight tracking-tight mb-2">Report Lost or Found Item</h1>
+<p class="text-gray-600 text-lg">Help reconnect lost belongings with their owners.</p>
+</div>
+<div class="mb-12 max-w-4xl mx-auto">
+<div class="flex justify-between items-center mb-4">
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">1</div>
+<span class="text-navy-dark text-sm font-semibold">Item Info</span>
+</div>
+<div class="h-1 flex-1 bg-gray-200 mx-4 rounded-full relative overflow-hidden">
+<div class="absolute inset-0 bg-primary w-full"></div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">2</div>
+<span class="text-navy-dark text-sm font-semibold">Location</span>
+</div>
+<div class="h-1 flex-1 bg-gray-200 mx-4 rounded-full relative overflow-hidden">
+<div class="absolute inset-0 bg-primary w-full"></div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">3</div>
+<span class="text-navy-dark text-sm font-semibold">Contact</span>
+</div>
+<div class="h-1 flex-1 bg-gray-200 mx-4 rounded-full relative overflow-hidden">
+<div class="absolute inset-0 bg-primary w-1/2"></div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-navy-dark font-bold">4</div>
+<span class="text-gray-500 text-sm font-medium">Privacy</span>
+</div>
+</div>
+</div>
+<form class="space-y-12">
+<div class="animate-in fade-in duration-500">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">featured_seasonal_and_gifts</span>
+<h2 class="text-navy-dark text-2xl font-bold">Step 1: Item Details</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-navy-dark text-base font-semibold px-1">Item Name</label>
+<div class="flex items-center rounded-full border border-gray-300 bg-white px-5 h-14 focus-within:border-primary transition-colors">
+<input class="bg-transparent border-none focus:ring-0 flex-1 text-navy-dark placeholder:text-gray-400" placeholder="What was lost or found?" type="text"/>
+<span class="material-symbols-outlined text-gray-400">card_giftcard</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-navy-dark text-base font-semibold px-1">Category</label>
+<div class="flex items-center rounded-full border border-gray-300 bg-white px-5 h-14 focus-within:border-primary transition-colors">
+<select class="bg-transparent border-none focus:ring-0 flex-1 text-navy-dark appearance-none cursor-pointer">
+<option value="">Select a category</option>
+<option>Electronics</option>
+<option>Wallet/ID</option>
+<option>Keys</option>
+<option>Clothing</option>
+<option>Other</option>
+</select>
+<span class="material-symbols-outlined text-gray-400">category</span>
+</div>
+</div>
+<div class="md:col-span-2 flex flex-col gap-2">
+<label class="text-navy-dark text-base font-semibold px-1">Description</label>
+<textarea class="rounded-xl border border-gray-300 bg-white p-5 focus:ring-primary focus:border-primary text-navy-dark placeholder:text-gray-400 resize-none" placeholder="Describe the item (color, brand, distinguishing marks)..." rows="3"></textarea>
+</div>
+</div>
+</div>
+<div class="animate-in fade-in duration-700">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">location_on</span>
+<h2 class="text-navy-dark text-2xl font-bold">Step 2: Discovery Info</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-navy-dark text-base font-semibold px-1">Date</label>
+<div class="flex items-center rounded-full border border-gray-300 bg-white px-5 h-14 focus-within:border-primary transition-colors">
+<input class="bg-transparent border-none focus:ring-0 flex-1 text-navy-dark cursor-pointer" type="date"/>
+<span class="material-symbols-outlined text-gray-400">calendar_today</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-navy-dark text-base font-semibold px-1">Location</label>
+<div class="flex items-center rounded-full border border-gray-300 bg-white px-5 h-14 focus-within:border-primary transition-colors">
+<input class="bg-transparent border-none focus:ring-0 flex-1 text-navy-dark placeholder:text-gray-400" placeholder="e.g. Student Union, Library Room 302" type="text"/>
+<span class="material-symbols-outlined text-gray-400">push_pin</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-navy-dark text-base font-semibold px-1">Item Condition</label>
+<div class="flex items-center rounded-full border border-gray-300 bg-white px-5 h-14 focus-within:border-primary transition-colors">
+<select class="bg-transparent border-none focus:ring-0 flex-1 text-navy-dark appearance-none cursor-pointer">
+<option value="">Assess the condition</option>
+<option>Excellent / New</option>
+<option>Good / Used</option>
+<option>Fair / Damaged</option>
+<option>Poor</option>
+</select>
+<span class="material-symbols-outlined text-gray-400">clinical_notes</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-navy-dark text-base font-semibold px-1">Item Image</label>
+<div class="flex items-center justify-center w-full">
+<label class="flex items-center justify-center w-full h-14 border-2 border-dashed border-primary/30 rounded-full cursor-pointer bg-primary/5 hover:bg-primary/10 transition-colors">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">photo_camera</span>
+<p class="text-sm text-primary font-medium">Click to upload photo</p>
+</div>
+<input class="hidden" type="file"/>
+</label>
+</div>
+</div>
+</div>
+</div>
+<div class="animate-in fade-in duration-1000">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">contact_mail</span>
+<h2 class="text-navy-dark text-2xl font-bold">Step 3: Contact Details</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-xl bg-white/30 border border-white/50">
+<div class="flex flex-col gap-2">
+<label class="text-navy-dark text-base font-semibold px-1">Email Address</label>
+<div class="flex items-center rounded-full border border-gray-300 bg-white px-5 h-14 focus-within:border-primary transition-colors">
+<input class="bg-transparent border-none focus:ring-0 flex-1 text-navy-dark placeholder:text-gray-400" placeholder="student@university.edu" type="email"/>
+<span class="material-symbols-outlined text-gray-400">mail</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-navy-dark text-base font-semibold px-1">Phone Number</label>
+<div class="flex items-center rounded-full border border-gray-300 bg-white px-5 h-14 focus-within:border-primary transition-colors">
+<input class="bg-transparent border-none focus:ring-0 flex-1 text-navy-dark placeholder:text-gray-400" placeholder="(555) 000-0000" type="tel"/>
+<span class="material-symbols-outlined text-gray-400">call</span>
+</div>
+</div>
+</div>
+</div>
+<div class="animate-in fade-in duration-1000">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">security</span>
+<h2 class="text-navy-dark text-2xl font-bold">Step 4: Privacy &amp; Notifications</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 rounded-xl bg-white/30 border border-white/50">
+<div class="flex flex-col gap-4">
+<label class="text-navy-dark text-base font-semibold px-1">Report Visibility</label>
+<div class="flex flex-col gap-3">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="w-5 h-5" name="visibility" type="radio" value="campus"/>
+<span class="text-navy-dark font-medium group-hover:text-primary transition-colors">Campus Wide</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-5 h-5" name="visibility" type="radio" value="admin"/>
+<span class="text-navy-dark font-medium group-hover:text-primary transition-colors">Admin Only</span>
+</label>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<label class="text-navy-dark text-base font-semibold px-1">Match Alerts</label>
+<label class="flex items-start gap-3 cursor-pointer group mt-1">
+<input class="w-5 h-5 rounded mt-0.5" type="checkbox"/>
+<span class="text-navy-dark font-medium group-hover:text-primary transition-colors">Notify me via email when a match is found</span>
+</label>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-center gap-4 pt-6">
+<button class="group relative flex h-16 w-full max-w-md items-center justify-center overflow-hidden rounded-full bg-primary text-white text-lg font-bold shadow-[0_8px_30px_rgb(74,108,247,0.3)] transition-all hover:scale-[1.02] active:scale-95" type="submit">
+<span class="flex items-center gap-2">
+                            SUBMIT REPORT
+                            <span class="material-symbols-outlined">send</span>
+</span>
+</button>
+<p class="text-gray-500 text-sm font-medium">By submitting, you agree to our community safety guidelines.</p>
+</div>
+</form>
+</div>
+</div>
+
+</body></html>

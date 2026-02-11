@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const requireAuth = require('../middleware/auth');
 const User = require('../models/User');
+const LostItem = require('../models/LostItem');
+const FoundItem = require('../models/FoundItem');
 
 // @desc    Update user profile
 // @route   PUT /api/users/me
@@ -136,7 +138,7 @@ const clearAllNotifications = async (req, res, next) => {
 const getPublicProfile = async (req, res, next) => {
   try {
     const targetUser = await User.findById(req.params.id)
-      .select('name role department block email phone altPhone institutionalId');
+      .select('name role department block email phone altPhone institutionalId emailVerified');
     
     if (!targetUser) {
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -162,7 +164,44 @@ const getPublicProfile = async (req, res, next) => {
   }
 };
 
+// @desc    Get user's report statistics
+// @route   GET /api/users/stats
+// @access  Private
+const getUserStats = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    
+    // Get user's lost and found items
+    const [lostItems, foundItems] = await Promise.all([
+      LostItem.find({ userId }),
+      FoundItem.find({ userId })
+    ]);
+    
+    // Calculate stats
+    const totalReports = lostItems.length + foundItems.length;
+    const resolvedReports = lostItems.filter(item => item.status === 'resolved').length + 
+                           foundItems.filter(item => item.status === 'resolved').length;
+    const pendingReports = totalReports - resolvedReports;
+    
+    // For active claims, we'd need to check interests/claims - for now using placeholder
+    const activeClaims = 0; // This would be calculated from claims/interests model
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        totalReports,
+        resolvedReports,
+        pendingReports,
+        activeClaims
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 router.put('/me', requireAuth, updateProfile);
+router.get('/stats', requireAuth, getUserStats);
 router.get('/notifications', requireAuth, getNotifications);
 router.patch('/notifications/:id/read', requireAuth, markNotificationRead);
 router.delete('/notifications', requireAuth, clearAllNotifications);

@@ -87,6 +87,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['all', 'admin-only', 'none'],
     default: 'all'
+  },
+  // Email verification fields
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  verificationToken: {
+    type: String,
+    select: false
+  },
+  verificationTokenExpires: {
+    type: Date,
+    select: false
   }
 }, {
   timestamps: true,

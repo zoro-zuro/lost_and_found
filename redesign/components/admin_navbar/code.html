@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>College Hub - Admin Navigation</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4A6CF7", // Royal Blue
+              "background-light": "#FFF9F5", // Soft off-white
+              "background-dark": "#111827",
+              "accent-peach": "#FFEEDD",
+            },
+            fontFamily: {
+              sans: ["Quicksand", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "12px",
+            },
+          },
+        },
+      };
+    </script>
+<style type="text/tailwindcss">
+      @layer base {
+        body {
+          @apply font-sans antialiased;
+        }
+      }
+      .nav-pill-active {
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 font-sans">
+<nav class="w-full max-w-7xl bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-orange-100/50 dark:border-gray-700 px-6 py-3 flex items-center justify-between transition-all duration-300">
+<div class="flex items-center gap-3 shrink-0">
+<div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">volunteer_activism</span>
+</div>
+<div>
+<h1 class="text-gray-900 dark:text-white font-extrabold text-lg leading-tight">College Hub</h1>
+<p class="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400 dark:text-gray-500 -mt-1">Lost &amp; Found</p>
+</div>
+</div>
+<div class="bg-gray-50/80 dark:bg-gray-900/50 p-1.5 rounded-full flex items-center gap-1">
+<a class="px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-200 bg-white dark:bg-gray-800 text-primary nav-pill-active shadow-sm" href="#">
+                Dashboard
+            </a>
+<a class="px-6 py-2.5 rounded-full text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200" href="#">
+                Reports
+            </a>
+<a class="px-6 py-2.5 rounded-full text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200" href="#">
+                Found &amp; Lost
+            </a>
+<a class="px-6 py-2.5 rounded-full text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200" href="#">
+                Claims
+            </a>
+</div>
+<div class="flex items-center gap-4 shrink-0">
+<button class="bg-primary hover:opacity-90 text-white px-8 py-2.5 rounded-full font-bold flex items-center gap-2 shadow-lg shadow-indigo-100 dark:shadow-none transition-all duration-300 transform hover:-translate-y-0.5">
+<span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+                Admin
+            </button>
+<div class="w-10 h-10 bg-accent-peach dark:bg-orange-900/30 rounded-full flex items-center justify-center cursor-pointer border-2 border-transparent hover:border-orange-200 transition-all">
+<span class="text-orange-700 dark:text-orange-300 font-bold">Y</span>
+</div>
+</div>
+</nav>
+<div class="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden pointer-events-none opacity-40">
+<div class="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-orange-100 dark:bg-indigo-900/20 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-blue-50 dark:bg-purple-900/10 rounded-full blur-[100px]"></div>
+</div>
+<div class="fixed bottom-8 right-8">
+<button class="p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined block">dark_mode</span>
+</button>
+</div>
+
+</body></html>

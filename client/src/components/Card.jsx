@@ -1,11 +1,11 @@
 import React from 'react';
 
-const Card = ({ children, className = '', hover = false }) => {
-  const baseClasses = 'card-base';
-  const hoverClasses = hover ? 'hover:border-primary/20 transition-all duration-300' : '';
-  
+const Card = ({ children, className = '', ...props }) => {
   return (
-    <div className={`${baseClasses} ${hoverClasses} ${className}`}>
+    <div 
+      className={`bg-white border border-slate-200 rounded-lg shadow-sm ${className}`}
+      {...props}
+    >
       {children}
     </div>
   );

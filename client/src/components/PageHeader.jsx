@@ -1,15 +1,15 @@
 import React from 'react';
 
-const PageHeader = ({ title, subtitle, action }) => {
+const PageHeader = ({ title, subtitle, children, className = '', ...props }) => {
   return (
-    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-      <div className="space-y-4">
-        <h1 className="text-display text-text">{title}</h1>
-        {/* {subtitle && <p className="text-body text-muted-text max-w-2xl">{subtitle}</p>} */}
-      </div>
-      {action && (
-        <div className="flex-shrink-0">
-          {action}
+    <div className={`mb-8 ${className}`} {...props}>
+      <h1 className="text-2xl font-bold text-slate-900 mb-2">{title}</h1>
+      {subtitle && (
+        <p className="text-slate-600">{subtitle}</p>
+      )}
+      {children && (
+        <div className="mt-4">
+          {children}
         </div>
       )}
     </div>

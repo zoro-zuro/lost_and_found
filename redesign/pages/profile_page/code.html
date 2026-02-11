@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Active Edit Profile Page</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "royal-blue": "#4A6CF7",
+                        "navy-quicksand": "#1A237E",
+                        "soft-gray-text": "#71717A",
+                        "disabled-gray": "#B0B0B0",
+                        "peach": "#FFD8B1",
+                        "mint": "#D1F2EB",
+                        "lavender": "#E8D5F2",
+                    },
+                    fontFamily: {
+                        "quicksand": ["Quicksand", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "3xl": "32px",
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .mesh-bg {
+            background-color: #FAFAFA;
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(255, 216, 177, 0.4) 0px, transparent 50%),
+                radial-gradient(at 90% 20%, rgba(209, 242, 235, 0.4) 0px, transparent 50%),
+                radial-gradient(at 50% 80%, rgba(232, 213, 242, 0.4) 0px, transparent 50%);
+        }
+        .glass-container {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 1);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+        .glass-card:focus-within {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: #4A6CF7;
+        }
+        .edit-input {
+            @apply w-full bg-white/40 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 font-semibold focus:ring-2 focus:ring-royal-blue/30 focus:border-royal-blue outline-none transition-all mt-1;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        form:focus-within #save-btn {
+            background-color: #4A6CF7;
+            cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(74, 108, 247, 0.3);
+            opacity: 1;
+        }
+        form:focus-within #save-btn:hover {
+            transform: scale(1.02);
+            background-color: #3D5ADB;
+        }
+    </style>
+</head>
+<body class="mesh-bg font-quicksand min-h-screen text-slate-800">
+<div class="flex flex-col items-center justify-center min-h-screen p-6">
+<div class="glass-container w-full max-w-[1140px] rounded-3xl p-10 md:p-16 shadow-2xl">
+<div class="flex flex-col items-center text-center mb-12">
+<div class="relative mb-6">
+<img alt="User Profile" class="w-32 h-32 rounded-[12px] object-cover shadow-lg border-4 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbIq_LTZOOprGM7DDzQELqfogbtAhePjn7Gyg6FEg3zQp6mnbF-SiHfoJeGK-Cv3KztSHetLNFxPdNtlFMemPSeDor0ass0Jm_UFCPI5YclgYzLeIPwVbQsWYucm5sTsoCOfIFHxyJk11OGvQDwDhI1-JQWokAnKMATAdT9haj3imMVrgD5_s5e0hFeh5R-85jETMyWkU71O6MXFraK0mhlo8x5OjWm9oVsDMkoL57rZK2HTDXfiH2g-dZ5pB4nvnTd9P9blD_g3Y"/>
+<div class="absolute -bottom-2 -right-2 bg-royal-blue text-white p-1.5 rounded-full shadow-md">
+<span class="material-symbols-outlined text-sm block">verified_user</span>
+</div>
+</div>
+<h1 class="text-3xl font-bold text-navy-quicksand mb-2">Alex Johnson</h1>
+<div class="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-1 rounded-full text-xs font-bold tracking-wider border border-green-200 uppercase">
+<span class="material-symbols-outlined text-xs">verified</span>
+                Verified Student
+            </div>
+</div>
+<form action="#" method="POST">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+<div class="glass-card p-5 rounded-2xl flex flex-col">
+<label class="text-[10px] font-bold text-navy-quicksand uppercase tracking-widest px-1">Registration Number</label>
+<input class="edit-input" placeholder="Enter Reg No." type="text" value="2021-CS-452"/>
+</div>
+<div class="glass-card p-5 rounded-2xl flex flex-col">
+<label class="text-[10px] font-bold text-navy-quicksand uppercase tracking-widest px-1">Block / Hall</label>
+<input class="edit-input" placeholder="Enter Residence" type="text" value="Newton East Wing"/>
+</div>
+<div class="glass-card p-5 rounded-2xl flex flex-col md:col-span-2">
+<label class="text-[10px] font-bold text-navy-quicksand uppercase tracking-widest px-1">Department</label>
+<input class="edit-input" placeholder="Enter Department" type="text" value="School of Computer Science &amp; Engineering"/>
+</div>
+<div class="glass-card p-5 rounded-2xl flex flex-col md:col-span-2">
+<label class="text-[10px] font-bold text-navy-quicksand uppercase tracking-widest px-1">Institutional Email</label>
+<input class="edit-input" placeholder="university@edu.com" type="email" value="alex.johnson@university.edu"/>
+</div>
+<div class="glass-card p-6 rounded-2xl md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1 px-1">
+<span class="material-symbols-outlined text-royal-blue text-[16px]">phone_iphone</span>
+<label class="text-[10px] font-bold text-navy-quicksand uppercase tracking-widest">Primary Contact</label>
+</div>
+<input class="edit-input" placeholder="Phone Number" type="tel" value="+1 (555) 0123-4567"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1 px-1">
+<span class="material-symbols-outlined text-royal-blue text-[16px]">alternate_email</span>
+<label class="text-[10px] font-bold text-navy-quicksand uppercase tracking-widest">Secondary Email</label>
+</div>
+<input class="edit-input" placeholder="Personal Email" type="email" value="alex.personal@gmail.com"/>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/40 pt-10">
+<button class="order-2 sm:order-1 border-2 border-royal-blue text-royal-blue px-10 py-3.5 rounded-full font-bold hover:bg-royal-blue/5 transition-colors duration-300 flex items-center gap-2" type="reset">
+<span class="material-symbols-outlined">restart_alt</span>
+                    Reset
+                </button>
+<button class="order-1 sm:order-2 bg-[#B0B0B0] text-white px-12 py-4 rounded-full font-bold shadow-lg transition-all duration-300 flex items-center gap-3 cursor-not-allowed" id="save-btn" type="submit">
+<span class="material-symbols-outlined">save</span>
+                    Save Changes
+                </button>
+</div>
+</form>
+</div>
+<div class="mt-8 text-soft-gray-text flex items-center gap-2 opacity-60">
+<span class="material-symbols-outlined">school</span>
+<span class="text-sm">St. Mary's Collegiate Portal</span>
+</div>
+</div>
+
+</body></html>

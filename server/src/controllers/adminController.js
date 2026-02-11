@@ -9,20 +9,35 @@ const Notification = require('../models/Notification');
 // @access  Private (Admin/Staff)
 const getAdminStats = async (req, res, next) => {
   try {
-    const totalLost = await LostItem.countDocuments();
     const totalFound = await FoundItem.countDocuments();
     const totalClaims = await Interest.countDocuments();
     const pendingClaims = await Interest.countDocuments({ status: 'PENDING' });
-    const pendingLostReviews = await LostItem.countDocuments({ reviewStatus: 'PENDING_REVIEW' });
+    const totalUsers = await User.countDocuments();
+
+    // Visibility-based status breakdowns
+    const adminStats = {
+      total: await LostItem.countDocuments({ visibility: 'ADMIN_ONLY' }),
+      open: await LostItem.countDocuments({ visibility: 'ADMIN_ONLY', status: 'OPEN' }),
+      matched: await LostItem.countDocuments({ visibility: 'ADMIN_ONLY', status: 'MATCHED' }),
+      resolved: await LostItem.countDocuments({ visibility: 'ADMIN_ONLY', status: 'CLOSED' })
+    };
+
+    const publicStats = {
+      total: await LostItem.countDocuments({ visibility: 'PUBLIC' }),
+      open: await LostItem.countDocuments({ visibility: 'PUBLIC', status: 'OPEN' }),
+      matched: await LostItem.countDocuments({ visibility: 'PUBLIC', status: 'MATCHED' }),
+      resolved: await LostItem.countDocuments({ visibility: 'PUBLIC', status: 'CLOSED' })
+    };
 
     res.status(200).json({
       success: true,
       data: {
-        totalLost,
         totalFound,
         totalClaims,
         pendingClaims,
-        pendingLostReviews
+        totalUsers,
+        adminStats,
+        publicStats
       }
     });
   } catch (error) {
@@ -235,9 +250,55 @@ const updateClaimStatus = async (req, res, next) => {
   }
 };
 
+// @desc    Get all reports (Filtered by visibility for admin/public tabs)
+// @route   GET /api/admin/reports
+// @access  Private (Admin/Staff)
+const getAllReports = async (req, res, next) => {
+  try {
+    const { search, location, visibility, user } = req.query;
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { itemName: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } }
+      ];
+    }
+    if (location) query.locationLost = location;
+    if (visibility) query.visibility = visibility;
+    if (user) query.userId = user;
+
+    const reports = await LostItem.find(query)
+      .sort({ createdAt: -1 })
+      .populate('userId', 'name email registerNumber staffId role');
+
+    res.status(200).json({
+      success: true,
+      data: reports
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    List all users (for dropdown filters)
+// @route   GET /api/admin/users
+// @access  Private (Admin/Staff)
+const listUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({}).select('name _id').sort({ name: 1 });
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAdminStats,
   getAllLostItems,
+  getAllReports,
+  listUsers,
   updateLostItemStatus,
   createFoundItem,
   getAllClaims,

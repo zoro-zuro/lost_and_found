@@ -30,11 +30,25 @@ app.use(morgan('dev'));
 
 // Rate limiting (basic)
 const rateLimit = require('express-rate-limit');
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 100 
+
+// General API rate limit
+const generalLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 100, // 100 requests per minute
+  message: 'Too many requests from this IP, please try again later.'
 });
-app.use('/api/', limiter);
+
+// Strict auth rate limit
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 auth requests per 15 minutes
+  message: 'Too many authentication attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', generalLimiter);
+app.use('/api/auth/', authLimiter);
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -44,7 +58,6 @@ app.use('/api/found', require('./routes/found'));
 app.use('/api/interests', require('./routes/interests'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/comments', require('./routes/comments'));
-app.use('/api/debug', require('./routes/debug'));
 
 // Health check
 app.get('/', (req, res) => res.send('API running'));
