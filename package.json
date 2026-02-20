@@ -6,9 +6,8 @@
   "scripts": {
     "start": "node server/src/index.js",
     "server": "nodemon server/src/index.js",
-    "run": "concurrently \"pnpm run server\" \"cd client && pnpm run client\"",
-    "build": "cd client && npm run build",
-    "vercel-build": "cd client && npm run build"
+    "dev": "concurrently \"pnpm run server\" \"cd client && pnpm run client\"",
+    "build": "cd client && npm install && npm run build"
   },
   "keywords": [],
   "author": "",
