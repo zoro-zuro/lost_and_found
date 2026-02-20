@@ -6,24 +6,22 @@
       "use": "@vercel/node"
     },
     {
-      "src": "client/package.json",
+      "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "client/dist"
       }
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/server/src/index.js"
+      "src": "/api/(.*)",
+      "dest": "/server/src/index.js"
     },
     {
-      "source": "/uploads/(.*)",
-      "destination": "/server/uploads/$1"
-    }
-  ],
-  "routes": [
+      "src": "/uploads/(.*)",
+      "dest": "/server/uploads/$1"
+    },
     {
       "handle": "filesystem"
     },
