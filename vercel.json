@@ -21,10 +21,15 @@
     {
       "source": "/uploads/(.*)",
       "destination": "/server/uploads/$1"
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
     },
     {
-      "source": "/(.*)",
-      "destination": "/client/dist/index.html"
+      "src": "/(.*)",
+      "dest": "/client/dist/index.html"
     }
   ]
 }
