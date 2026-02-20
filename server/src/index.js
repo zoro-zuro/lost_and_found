@@ -31,6 +31,15 @@ app.use(morgan('dev'));
 // Rate limiting (basic)
 const rateLimit = require('express-rate-limit');
 
+// Auth-specific rate limit
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 requests per 15 minutes
+  message: 'Too many authentication attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // General API rate limit
 const generalLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
@@ -38,16 +47,15 @@ const generalLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.'
 });
 
-// Strict auth rate limit
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 auth requests per 15 minutes
-  message: 'Too many authentication attempts, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+app.use('/api/interests', generalLimiter);
+app.use('/api/users', generalLimiter);
+app.use('/api/lost', generalLimiter);
+app.use('/api/found', generalLimiter);
+app.use('/api/admin', generalLimiter);
+app.use('/api/comments', generalLimiter);
 
-app.use('/api/', generalLimiter);
+// Auth routes (no general limiter)
+app.use('/api/auth', authLimiter);
 app.use('/api/auth/', authLimiter);
 
 // Routes

@@ -225,12 +225,52 @@ const Login = () => {
                 </svg>
                 
                 {/* Animated Elements */}
-                <div className="absolute top-8 left-8 transform -rotate-12 animate-bounce-subtle" style={{animationDelay: '0.5s'}}>
-                  <svg fill="none" height="36" viewBox="0 0 40 40" width="36">
-                    <circle cx="15" cy="15" fill="#E8D5F2" r="8" stroke="#1E293B" strokeWidth="2"></circle>
-                    <path d="M22,22 L35,35 M30,30 L35,25 M25,35 L30,30" stroke="#1E293B" strokeLinecap="round" strokeWidth="2"></path>
-                  </svg>
-                </div>
+                <div 
+  className="absolute top-2 left-8 transform rotate-12 animate-bounce-subtle"
+  style={{ animationDelay: '1.5s' }}
+>
+  <svg fill="none" height="28" viewBox="0 0 80 40" width="70">
+    
+    {/* Key Head */}
+    <circle
+      cx="20"
+      cy="20"
+      r="10"
+      fill="#D1F2EB"
+      stroke="#1E293B"
+      strokeWidth="2"
+    />
+
+    {/* Inner hole of key */}
+    <circle
+      cx="20"
+      cy="20"
+      r="4"
+      stroke="#1E293B"
+      strokeWidth="2"
+    />
+
+    {/* Key Shaft */}
+    <rect
+      x="30"
+      y="18"
+      width="28"
+      height="4"
+      fill="#D1F2EB"
+      stroke="#1E293B"
+      strokeWidth="2"
+    />
+
+    {/* Key Teeth */}
+    <path
+      d="M58 18 v6 h6 v-6"
+      fill="#D1F2EB"
+      stroke="#1E293B"
+      strokeWidth="2"
+    />
+  </svg>
+</div>
+
                 <div className="absolute top-0 right-8 transform rotate-12 animate-bounce-subtle" style={{animationDelay: '1.5s'}}>
                   <svg fill="none" height="28" viewBox="0 0 60 30" width="56">
                     <circle cx="15" cy="15" fill="#D1F2EB" r="10" stroke="#1E293B" strokeWidth="2"></circle>
