@@ -55,8 +55,8 @@ app.use('/api/admin', generalLimiter);
 app.use('/api/comments', generalLimiter);
 
 // Auth routes (no general limiter)
-app.use('/api/auth', authLimiter);
-app.use('/api/auth/', authLimiter);
+//app.use('/api/auth', authLimiter);
+//app.use('/api/auth/', authLimiter);
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
