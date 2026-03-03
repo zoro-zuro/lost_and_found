@@ -22,13 +22,14 @@ const validateAMCEmail = (email) => {
 // @access  Public
 const register = async (req, res, next) => {
   try {
-    const { 
-      name, 
-      email, 
-      password, 
+    const {
+      name,
+      email,
+      password,
       role,
       registerNumber,
       block,
+      department,
       staffId,
       phone,
       altPhone,
@@ -45,10 +46,10 @@ const register = async (req, res, next) => {
 
     // Validate required fields based on role
     if (role === 'STUDENT') {
-      if (!registerNumber || !block) {
+      if (!registerNumber || !block || !department) {
         return res.status(400).json({
           success: false,
-          message: 'Students must provide register number and block'
+          message: 'Students must provide register number, block and department'
         });
       }
     } else if (role === 'STAFF' || role === 'ADMIN') {
@@ -58,7 +59,7 @@ const register = async (req, res, next) => {
           message: 'Staff/Admin must provide staff ID'
         });
       }
-      
+
       // Verify staff registration secret
       const expectedSecret = process.env.STAFF_REGISTER_SECRET || 'amc_staff_2024';
       if (staffSecret !== expectedSecret) {
@@ -70,8 +71,8 @@ const register = async (req, res, next) => {
     }
 
     // Generate the internal unique code for checking
-    const userCode = role === 'STUDENT' 
-      ? `STD-${registerNumber.toUpperCase()}` 
+    const userCode = role === 'STUDENT'
+      ? `STD-${registerNumber.toUpperCase()}`
       : `EMP-${staffId.toUpperCase()}`;
 
     // Check if user exists
@@ -98,6 +99,7 @@ const register = async (req, res, next) => {
       role,
       phone,
       altPhone,
+      department,
       institutionalId: role === 'STUDENT' ? registerNumber : staffId,
       block: role === 'STUDENT' ? block : undefined
     };
@@ -115,8 +117,8 @@ const register = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: role === 'STUDENT' 
-        ? 'Account created successfully!' 
+      message: role === 'STUDENT'
+        ? 'Account created successfully!'
         : 'Account created! Awaiting admin approval.',
       data: {
         user,
@@ -261,9 +263,9 @@ const sendVerification = async (req, res, next) => {
 
     // Send email
     const emailResult = await sendMail({
-  to: user.email,
-  subject: 'Verify Your Email - AMC Lost & Found',
-  html: `
+      to: user.email,
+      subject: 'Verify Your Email - AMC Lost & Found',
+      html: `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -494,7 +496,7 @@ const sendVerification = async (req, res, next) => {
     </body>
     </html>
   `,
-  text: `
+      text: `
 Hello ${user.name},
 
 Welcome to AMC Lost & Found.
@@ -508,7 +510,7 @@ This link will expire in 24 hours. If you didn't request this verification, you 
 
 © 2024 AMC Lost & Found. All rights reserved.
   `,
-});
+    });
 
 
     if (!emailResult.success) {
